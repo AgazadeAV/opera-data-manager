@@ -1,3 +1,16 @@
 spring:
   application:
     name: opera-data-manager
+
+api:
+  base:
+    url: /api/v1
+
+selenium:
+  chrome:
+    option-name: debuggerAddress
+    endpoint: 127.0.0.1:9222
+  timeout: 20s
+
+opera:
+  url-part: oraclecloud.com
