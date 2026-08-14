@@ -1,0 +1,14 @@
+{
+    "name": "opera-data-manager-extension",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "npm run build:content && npm run build:main",
+        "build:content": "esbuild src/content/opera-content.js --bundle --outfile=dist/opera-content.js",
+        "build:main": "esbuild src/content/opera-main.js --bundle --outfile=dist/opera-main.js"
+    },
+    "devDependencies": {
+        "esbuild": "^0.25.0"
+    }
+}

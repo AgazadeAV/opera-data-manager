@@ -1,0 +1,42 @@
+{
+    "manifest_version": 3,
+    "name": "Opera Cloud Data Manager",
+    "version": "1.0.0",
+    "description": "Automation for Opera Cloud",
+    "permissions": [
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://*.oraclecloud.com/*",
+        "http://localhost:8080/*"
+    ],
+    "background": {
+        "service_worker": "src/background/service-worker.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://*.oraclecloud.com/*"
+            ],
+            "js": [
+                "dist/opera-main.js"
+            ],
+            "world": "MAIN",
+            "run_at": "document_idle"
+        },
+        {
+            "matches": [
+                "https://*.oraclecloud.com/*"
+            ],
+            "js": [
+                "dist/opera-content.js"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "action": {
+        "default_title": "OPERA Data Manager",
+        "default_popup": "src/popup/popup.html"
+    }
+}

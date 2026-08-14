@@ -1,4 +1,4 @@
-HELP.md
+opera-data-manager-server/HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+dist/
+node_modules/
+package-lock.json
+backup/
+opera-data-manager-client.crx
+opera-data-manager-client.pem

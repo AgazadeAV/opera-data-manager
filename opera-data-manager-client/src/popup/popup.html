@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPERA Data Manager</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>OPERA Data Manager</h1>
+
+        <!-- STEP 1 -->
+        <section id="import-type-page">
+
+            <div class="page-title">
+                What do you want to import?
+            </div>
+
+            <div class="option-list">
+
+                <button class="option" type="button" data-import-type="transaction-code">
+                    <span class="option-title">
+                        Transaction Codes
+                    </span>
+
+                    <span class="option-description">
+                        Create and import transaction codes
+                    </span>
+                </button>
+
+                <button class="option disabled" type="button" disabled>
+                    <span class="option-title">
+                        Rate Codes
+                    </span>
+
+                    <span class="option-description">
+                        Coming soon
+                    </span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- STEP 2 -->
+        <section id="method-page" hidden>
+
+            <button id="back-to-import-types" class="back-button" type="button">
+                ← Back
+            </button>
+
+            <div class="page-title">
+                Transaction Codes
+            </div>
+
+            <div class="option-list">
+
+                <button id="manual-option" class="option" type="button">
+                    <span class="option-title">
+                        Create manually
+                    </span>
+
+                    <span class="option-description">
+                        Enter one transaction code
+                    </span>
+                </button>
+
+                <button id="file-option" class="option" type="button">
+                    <span class="option-title">
+                        Import from file
+                    </span>
+
+                    <span class="option-description">
+                        Import multiple transaction codes
+                    </span>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- MANUAL TRANSACTION CODE -->
+        <section id="manual-page" hidden>
+
+            <button id="back-to-methods" class="back-button" type="button">
+                ← Back
+            </button>
+
+            <div class="page-title">
+                Create Transaction Code
+            </div>
+
+            <form id="transaction-code-form">
+
+                <div class="field">
+                    <label for="code">
+                        Code
+                    </label>
+
+                    <input id="code" name="code" type="text" required>
+                </div>
+
+                <div class="field">
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <input id="description" name="description" type="text" required>
+                </div>
+
+                <div class="field">
+                    <label for="subgroup">
+                        Subgroup
+                    </label>
+
+                    <input id="subgroup" name="subgroup" type="text" required>
+                </div>
+
+                <div class="field">
+                    <label for="transactionType">
+                        Transaction Type
+                    </label>
+
+                    <input id="transactionType" name="transactionType" type="text">
+                </div>
+
+                <div class="checkboxes">
+
+                    <label class="checkbox">
+                        <input id="revenueGroup" name="revenueGroup" type="checkbox">
+
+                        <span>
+                            Revenue Group
+                        </span>
+                    </label>
+
+                    <label class="checkbox">
+                        <input id="manualPosting" name="manualPosting" type="checkbox">
+
+                        <span>
+                            Manual Posting
+                        </span>
+                    </label>
+
+                </div>
+
+                <button id="create-button" type="submit">
+                    Create Transaction Code
+                </button>
+
+            </form>
+
+        </section>
+
+
+        <!-- FILE IMPORT -->
+        <section id="file-page" hidden>
+
+            <button id="back-from-file" class="back-button" type="button">
+                ← Back
+            </button>
+
+            <div class="page-title">
+                Import Transaction Codes
+            </div>
+
+            <div class="file-field">
+
+                <label for="transaction-code-file">
+                    Select file
+                </label>
+
+                <input id="transaction-code-file" type="file" accept=".csv,.xlsx,.xls">
+
+            </div>
+
+            <button id="import-file-button" type="button" disabled>
+                Import Transaction Codes
+            </button>
+
+        </section>
+
+
+        <div id="status" class="status" hidden></div>
+
+    </div>
+
+    <script type="module" src="popup.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: opera-data-manager
+
+api:
+  base:
+    url: /api/v1
