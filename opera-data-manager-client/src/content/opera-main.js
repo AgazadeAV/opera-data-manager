@@ -1,10 +1,12 @@
-import { MESSAGE_TYPES, DOM_ELEMENTS, DOM_EVENTS, FIELD_ACTIONS } from "../utils/constants.js";
+import { DOM_ELEMENTS, DOM_EVENTS, ERROR_MESSAGES_WITH_VALUES, FIELD_ACTIONS, MESSAGE_TYPES } from "../utils/constants.js";
 
 window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
-    if (
-        event.source !== window ||
+
+    if (event.source !== window ||
         event.data?.type !== MESSAGE_TYPES.OPERA_ADF_REQUEST
-    ) return;
+    ) {
+        return;
+    }
 
     const { requestId, action, params } = event.data;
 
@@ -17,7 +19,9 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
         const field = document.getElementById(label.htmlFor);
 
         if (!field) {
-            throw new Error(`${key} field not found`);
+            throw new Error(
+                ERROR_MESSAGES_WITH_VALUES.FIELD_NOT_FOUND(key)
+            );
         }
 
         const component = AdfPage.PAGE.findComponentByAbsoluteId(
@@ -25,7 +29,9 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
         );
 
         if (!component) {
-            throw new Error(`${key} ADF component not found`);
+            throw new Error(
+                ERROR_MESSAGES_WITH_VALUES.ADF_COMPONENT_NOT_FOUND(key)
+            );
         }
 
         let result;
@@ -49,7 +55,9 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
 
             case FIELD_ACTIONS.GET_VALUE: {
                 const peer = component.getPeer?.();
+
                 const domNode = peer?._domNode;
+
                 const input = domNode?.querySelector(DOM_ELEMENTS.INPUT);
 
                 result = {
@@ -60,11 +68,13 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 break;
             }
 
-            case FIELD_ACTIONS.GET_TYPE:
+            case FIELD_ACTIONS.GET_TYPE: {
                 result = component.getType?.();
-                break;
 
-            case FIELD_ACTIONS.GET_INFO:
+                break;
+            }
+
+            case FIELD_ACTIONS.GET_INFO: {
                 result = {
                     type: component.getType?.(),
                     value: component.getValue?.(),
@@ -72,23 +82,27 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                     componentType: component._componentType,
                     peer: !!component.getPeer?.()
                 };
-                break;
 
-            case FIELD_ACTIONS.GET_METHODS:
+                break;
+            }
+
+            case FIELD_ACTIONS.GET_METHODS: {
                 result = {
                     component: Object.getOwnPropertyNames(
                         Object.getPrototypeOf(component)
                     ),
-                    peer: component.getPeer
-                        ? Object.getOwnPropertyNames(
+                    peer: component.getPeer ?
+                        Object.getOwnPropertyNames(
                             Object.getPrototypeOf(component.getPeer())
-                        )
-                        : []
+                        ) : []
                 };
+
                 break;
+            }
 
             case FIELD_ACTIONS.GET_DEBUG: {
                 const peer = component.getPeer?.();
+
                 const domNode = peer?._domNode;
 
                 result = JSON.stringify({
@@ -115,22 +129,25 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                     peerMethods: peer
                         ? Object.getOwnPropertyNames(
                             Object.getPrototypeOf(peer)
-                        )
-                        : []
+                        ) : []
                 });
 
                 break;
             }
 
-            default:
-                throw new Error(`Unknown ADF action: ${action}`);
+            default: {
+                throw new Error(
+                    ERROR_MESSAGES_WITH_VALUES.UNKNOWN_ADF_ACTION(action)
+                );
+            }
         }
 
         window.postMessage({
             type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
             requestId,
             result
-        }, "*");
+        },
+            "*");
 
     } catch (e) {
 
@@ -138,6 +155,7 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
             type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
             requestId,
             error: e.message
-        }, "*");
+        },
+            "*");
     }
 });

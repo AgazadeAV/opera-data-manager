@@ -1,6 +1,5 @@
 package com.hrsinternational.operadatamanager.swagger.specs;
 
-import com.hrsinternational.operadatamanager.dto.TransactionCodeDto;
 import com.hrsinternational.operadatamanager.dto.TransactionCodeRequest;
 import com.hrsinternational.operadatamanager.dto.TransactionCodeResponse;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;

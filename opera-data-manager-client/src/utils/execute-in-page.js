@@ -1,7 +1,7 @@
-import { MESSAGE_TYPES, DOM_EVENTS } from "../utils/constants.js";
+import { DOM_EVENTS, MESSAGE_TYPES } from "./constants.js";
 
 export function executeInPage(action, params = {}) {
-    
+
     return new Promise((resolve, reject) => {
 
         const requestId = `opera-adf-${Date.now()}-${Math.random()}`;
@@ -12,7 +12,9 @@ export function executeInPage(action, params = {}) {
                 event.source !== window ||
                 event.data?.type !== MESSAGE_TYPES.OPERA_ADF_RESPONSE ||
                 event.data.requestId !== requestId
-            ) return;
+            ) {
+                return;
+            }
 
             window.removeEventListener(DOM_EVENTS.MESSAGE, handler);
 
@@ -30,6 +32,7 @@ export function executeInPage(action, params = {}) {
             requestId,
             action,
             params
-        }, "*");
+        },
+            "*");
     });
 }

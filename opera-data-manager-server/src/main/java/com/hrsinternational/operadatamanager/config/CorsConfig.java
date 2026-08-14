@@ -18,6 +18,9 @@ public class CorsConfig {
             ) {
                 registry
                         .addMapping("/api/**")
+                        .allowedOriginPatterns(
+                                "chrome-extension://*"
+                        )
                         .allowedOrigins(
                                 "https://accorce1ua.oraclehospitality.eu-frankfurt-1.ocs.oraclecloud.com"
                         )

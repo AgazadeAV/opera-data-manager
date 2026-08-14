@@ -11,7 +11,7 @@
         "http://localhost:8080/*"
     ],
     "background": {
-        "service_worker": "src/background/service-worker.js",
+        "service_worker": "background/service-worker.js",
         "type": "module"
     },
     "content_scripts": [
@@ -20,7 +20,7 @@
                 "https://*.oraclecloud.com/*"
             ],
             "js": [
-                "dist/opera-main.js"
+                "content/opera-main.js"
             ],
             "world": "MAIN",
             "run_at": "document_idle"
@@ -30,13 +30,13 @@
                 "https://*.oraclecloud.com/*"
             ],
             "js": [
-                "dist/opera-content.js"
+                "content/opera-content.js"
             ],
             "run_at": "document_idle"
         }
     ],
     "action": {
         "default_title": "OPERA Data Manager",
-        "default_popup": "src/popup/popup.html"
+        "default_popup": "popup/popup.html"
     }
 }

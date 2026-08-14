@@ -1,76 +1,57 @@
-import { ExtensionActions } from "../opera/core/extension-actions.js";
-import { TransactionCodeDriver } from "../opera/transaction-code/transaction-code-driver.js";
-import { ServerClient } from "../api/server-client.js";
-import { MESSAGE_TYPES, TRANSACTION_CODE_PAGE_LABELS, OPERA_CLOUD_BUTTON_LABELS } from "../../utils/constants.js";
+import { MESSAGE_TYPES, OPERA_CLOUD_BUTTON_LABELS, TRANSACTION_CODE_PAGE_LABELS } from "../utils/constants.js";
+import { registerMessageHandler } from "../utils/message-handler.js";
+import { TransactionCodeDriver } from "../drivers/transaction-code/transaction-code-driver.js";
 
-const actions = new ExtensionActions();
-const transactionCodeDriver = new TransactionCodeDriver(actions);
-const serverClient = new ServerClient();
+const transactionCodeDriver = new TransactionCodeDriver();
 
-chrome.runtime.onMessage.addListener(
+registerMessageHandler(MESSAGE_TYPES.FILL_TRANSACTION_CODE, fillTransactionCode);
 
-    (message, sender, sendResponse) => {
+async function fillTransactionCode(data) {
 
-        handleMessage(message)
-            .then(result => {
-                sendResponse({
-                    success: true,
-                    result
-                });
-            })
-            .catch(error => {
-                console.error("Opera Cloud content script error:", error);
+    await transactionCodeDriver.clickButton(
+        OPERA_CLOUD_BUTTON_LABELS.NEW
+    );
 
-                sendResponse({
-                    success: false,
-                    error: error.message
-                });
-            });
+    await transactionCodeDriver.waitForTransactionCodePage(
+        TRANSACTION_CODE_PAGE_LABELS.CODE_LABEL,
+        TRANSACTION_CODE_PAGE_LABELS.DESCRIPTION_LABEL,
+        TRANSACTION_CODE_PAGE_LABELS.TRANSACTION_TYPE_LABEL,
+        TRANSACTION_CODE_PAGE_LABELS.SUBGROUP_LABEL
+    );
 
-        return true;
-    }
-);
+    await transactionCodeDriver.setFieldValue(
+        TRANSACTION_CODE_PAGE_LABELS.CODE_LABEL,
+        data.code
+    );
 
-async function handleMessage(message) {
+    await transactionCodeDriver.setFieldValue(
+        TRANSACTION_CODE_PAGE_LABELS.DESCRIPTION_LABEL,
+        data.description
+    );
 
-    switch (message.type) {
+    await transactionCodeDriver.setFieldValue(
+        TRANSACTION_CODE_PAGE_LABELS.TRANSACTION_TYPE_LABEL,
+        data.transactionType
+    );
 
-        case MESSAGE_TYPES.CREATE_TRANSACTION_CODE:
-            return await createTransactionCode(message.data);
+    await transactionCodeDriver.setFieldValue(
+        TRANSACTION_CODE_PAGE_LABELS.SUBGROUP_LABEL,
+        data.subgroup
+    );
 
-        default:
+    await transactionCodeDriver.setCheckboxState(
+        TRANSACTION_CODE_PAGE_LABELS.REVENUE_GROUP_LABEL,
+        data.revenueGroup
+    );
 
-            throw new Error(
-                `Unknown message type: ${message.type}`
-            );
-    }
-}
+    await transactionCodeDriver.setCheckboxState(
+        TRANSACTION_CODE_PAGE_LABELS.MANUAL_POSTING_LABEL,
+        data.manualPosting
+    );
 
-async function createTransactionCode(data) {
-
-    const transactionCode = await serverClient.createTransactionCode(data);
-
-    await transactionCodeDriver.clickButton(TRANSACTION_CODE_PAGE_LABELS.SAVE);
-
-    await transactionCodeDriver.waitForTransactionCodePage();
-
-    await transactionCodeDriver.fill(TRANSACTION_CODE_PAGE_LABELS.CODE_LABEL, transactionCode.code);
-
-    await transactionCodeDriver.fill(TRANSACTION_CODE_PAGE_LABELS.DESCRIPTION_LABEL, transactionCode.description);
-
-    await transactionCodeDriver.fill(TRANSACTION_CODE_PAGE_LABELS.TRANSACTION_TYPE_LABEL, transactionCode.transactionType);
-
-    await transactionCodeDriver.fill(TRANSACTION_CODE_PAGE_LABELS.SUBGROUP_LABEL, transactionCode.subgroup);
-
-    if (transactionCode.revenueGroup) {
-        await transactionCodeDriver.setCheckbox(TRANSACTION_CODE_PAGE_LABELS.REVENUE_GROUP_LABEL, true);
-    }
-
-    if (transactionCode.manualPosting) {
-        await transactionCodeDriver.setCheckbox(TRANSACTION_CODE_PAGE_LABELS.MANUAL_POSTING_LABEL, true);
-    }
-
-    await transactionCodeDriver.clickButton(TRANSACTION_CODE_PAGE_LABELS.SAVE);
+    await transactionCodeDriver.clickButton(
+        OPERA_CLOUD_BUTTON_LABELS.SAVE
+    );
 
     return true;
 }

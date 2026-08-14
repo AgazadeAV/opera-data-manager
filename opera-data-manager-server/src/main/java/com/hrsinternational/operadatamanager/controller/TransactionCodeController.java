@@ -1,6 +1,5 @@
 package com.hrsinternational.operadatamanager.controller;
 
-import com.hrsinternational.operadatamanager.dto.TransactionCodeDto;
 import com.hrsinternational.operadatamanager.dto.TransactionCodeRequest;
 import com.hrsinternational.operadatamanager.dto.TransactionCodeResponse;
 import com.hrsinternational.operadatamanager.service.transactioncode.TransactionCodeService;

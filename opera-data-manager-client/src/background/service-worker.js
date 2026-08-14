@@ -1,59 +1,30 @@
-import { CONFIG, MESSAGE_TYPES, CHROME_ERROR_MESSAGES } from "../../utils/constants.js";
+import { CONFIG, ERROR_MESSAGES, MESSAGE_TYPES } from "../utils/constants.js";
+import { registerMessageHandler } from "../utils/message-handler.js";
+import { ServerClient } from "../api/server-client.js";
 
-chrome.runtime.onMessage.addListener(
+const serverClient = new ServerClient();
 
-    (message, sender, sendResponse) => {
+registerMessageHandler(MESSAGE_TYPES.CREATE_TRANSACTION_CODE, createTransactionCode);
 
-        handleMessage(message)
-            .then(result => {
-                sendResponse({
-                    success: true,
-                    result
-                });
-            })
-            .catch(error => {
-                console.error(
-                    CHROME_ERROR_MESSAGES.SERVICE_WORKER_ERROR,
-                    error
-                );
+async function createTransactionCode(data) {
 
-                sendResponse({
-                    success: false,
-                    error: error.message
-                });
-            });
+    const transactionCode = await serverClient.createTransactionCode(data);
 
-        return true;
-    }
-);
-
-async function handleMessage(message) {
-
-    switch (message.type) {
-
-        case MESSAGE_TYPES.CREATE_TRANSACTION_CODE:
-
-            return await sendToOperaTab(message);
-
-        default:
-
-            throw new Error(
-                `${CHROME_ERROR_MESSAGES.UNKNOWN_MESSAGE_TYPE} ${message.type}`
-            );
-    }
+    return await sendToOperaTab({
+        type: MESSAGE_TYPES.FILL_TRANSACTION_CODE,
+        data: transactionCode
+    });
 }
 
 async function sendToOperaTab(message) {
 
     const tabs = await chrome.tabs.query({
-        url: [
-            `https://*.${CONFIG.OPERA_CLOUD_URL_PART}/*`
-        ]
+        url: CONFIG.OPERA_CLOUD_TAB_URL_PATTERN
     });
 
     if (!tabs.length) {
         throw new Error(
-            CHROME_ERROR_MESSAGES.OPERA_CLOUD_TAB_NOT_FOUND
+            ERROR_MESSAGES.OPERA_CLOUD_TAB_NOT_FOUND
         );
     }
 
@@ -61,7 +32,7 @@ async function sendToOperaTab(message) {
 
     if (!tab.id) {
         throw new Error(
-            CHROME_ERROR_MESSAGES.OPERA_CLOUD_TAB_ID_NOT_FOUND
+            ERROR_MESSAGES.OPERA_CLOUD_TAB_ID_NOT_FOUND
         );
     }
 

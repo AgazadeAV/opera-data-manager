@@ -1,4 +1,4 @@
-import { MESSAGE_TYPES, UI_EVENTS, UI_STATUS_TYPES, UI_TEXT, DOM_IDS, DOM_SELECTORS, IMPORT_TYPES } from "../../utils/constants.js";
+import { DOM_EVENTS, DOM_IDS, DOM_SELECTORS, ERROR_MESSAGES, ERROR_MESSAGES_WITH_VALUES, IMPORT_TYPES, MESSAGE_TYPES, UI_STATUS_TYPES, UI_TEXT, UI_TEXT_WITH_VALUES } from "../utils/constants.js";
 
 const importTypePage = document.getElementById("import-type-page");
 const methodPage = document.getElementById("method-page");
@@ -30,27 +30,27 @@ function showStatus(message, type) {
     status.className = `status ${type}`;
 }
 
-document
-    .querySelectorAll(DOM_SELECTORS.IMPORT_TYPE)
+document.querySelectorAll(DOM_SELECTORS.IMPORT_TYPE)
     .forEach(button => {
-        button.addEventListener(UI_EVENTS.CLICK, () => {
+        button.addEventListener(DOM_EVENTS.CLICK, () => {
             const importType = button.dataset.importType;
-            if (importType === IMPORT_TYPES.TRANSACTION_CODE) showPage(methodPage);
-        }
-        );
+            if (importType === IMPORT_TYPES.TRANSACTION_CODE) {
+                showPage(methodPage);
+            }
+        });
     });
 
-manualOption.addEventListener(UI_EVENTS.CLICK, () => { showPage(manualPage); });
+manualOption.addEventListener(DOM_EVENTS.CLICK, () => { showPage(manualPage); });
 
-fileOption.addEventListener(UI_EVENTS.CLICK, () => { showPage(methodPage); });
+fileOption.addEventListener(DOM_EVENTS.CLICK, () => { showPage(filePage); });
 
-backToImportTypes.addEventListener(UI_EVENTS.CLICK, () => { showPage(methodPage); });
+backToImportTypes.addEventListener(DOM_EVENTS.CLICK, () => { showPage(importTypePage); });
 
-backToMethods.addEventListener(UI_EVENTS.CLICK, () => { showPage(methodPage); });
+backToMethods.addEventListener(DOM_EVENTS.CLICK, () => { showPage(methodPage); });
 
-backFromFile.addEventListener(UI_EVENTS.CLICK, () => { showPage(methodPage); });
+backFromFile.addEventListener(DOM_EVENTS.CLICK, () => { showPage(methodPage); });
 
-form.addEventListener(UI_EVENTS.SUBMIT, async event => {
+form.addEventListener(DOM_EVENTS.SUBMIT, async event => {
 
     event.preventDefault();
 
@@ -64,7 +64,7 @@ form.addEventListener(UI_EVENTS.SUBMIT, async event => {
     };
 
     if (!data.code || !data.description || !data.subgroup) {
-        showStatus(UI_TEXT.REQUIRED_FIELDS_ERROR, UI_STATUS_TYPES.ERROR);
+        showStatus(ERROR_MESSAGES.REQUIRED_FIELDS_ERROR, UI_STATUS_TYPES.ERROR);
         return;
     }
 
@@ -77,49 +77,66 @@ form.addEventListener(UI_EVENTS.SUBMIT, async event => {
         });
 
         if (!response?.success) {
-            throw new Error(response?.error || UI_TEXT.CREATE_TRANSACTION_CODE_FAILED);
+            throw new Error(
+                response?.error ||
+                ERROR_MESSAGES_WITH_VALUES.CREATE_TRANSACTION_CODE_FAILED
+            );
         }
 
         showStatus(UI_TEXT.TRANSACTION_CODE_CREATED, UI_STATUS_TYPES.SUCCESS);
 
         form.reset();
+
     } catch (error) {
-        console.error(UI_TEXT.CREATE_TRANSACTION_CODE_FAILED, error);
+
+        console.error(ERROR_MESSAGES_WITH_VALUES.CREATE_TRANSACTION_CODE_FAILED(error));
         showStatus(error.message, UI_STATUS_TYPES.ERROR);
+
     } finally {
+
         setLoading(false);
     }
 });
 
-fileInput.addEventListener(UI_EVENTS.CHANGE, () => {
+fileInput.addEventListener(DOM_EVENTS.CHANGE, () => {
     const file = fileInput.files?.[0];
     importFileButton.disabled = !file;
 });
 
-importFileButton.addEventListener(UI_EVENTS.CHANGE, async () => {
+importFileButton.addEventListener(DOM_EVENTS.CLICK, async () => {
 
     const file = fileInput.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+        return;
+    }
 
     importFileButton.disabled = true;
     importFileButton.textContent = UI_TEXT.UPLOADING_TRANSACTION_CODES;
 
-    showStatus(`${UI_TEXT.FILE_SELECTED_PREFIX} ${file.name}`, UI_STATUS_TYPES.LOADING);
+    showStatus(UI_TEXT_WITH_VALUES.FILE_SELECTED_PREFIX(file.name), UI_STATUS_TYPES.LOADING);
 
     try {
-        console.log(UI_TEXT.FILE_SELECTED_PREFIX, file);
+        console.log(UI_TEXT_WITH_VALUES.FILE_SELECTED_PREFIX(file.name));
         showStatus(UI_TEXT.FILE_SELECTED, UI_STATUS_TYPES.SUCCESS);
+
     } catch (error) {
-        console.error(UI_TEXT.FILE_IMPORT_FAILED, error);
+
+        console.error(ERROR_MESSAGES_WITH_VALUES.FILE_IMPORT_FAILED(error));
         showStatus(error.message, UI_STATUS_TYPES.ERROR);
+
     } finally {
+
         importFileButton.disabled = false;
         importFileButton.textContent = UI_TEXT.IMPORT_TRANSACTION_CODES;
     }
 });
 
 function setLoading(loading) {
+
     createButton.disabled = loading;
-    createButton.textContent = loading ? UI_TEXT.CREATING_TRANSACTION_CODE : UI_TEXT.CREATE_TRANSACTION_CODE;
+
+    createButton.textContent = loading ?
+        UI_TEXT.CREATING_TRANSACTION_CODE :
+        UI_TEXT.CREATE_TRANSACTION_CODE;
 }
