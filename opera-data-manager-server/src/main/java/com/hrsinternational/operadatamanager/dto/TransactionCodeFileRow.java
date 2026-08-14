@@ -13,7 +13,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionCodeResponse {
+public class TransactionCodeFileRow {
     private String code;
     private String description;
     private String subgroup;

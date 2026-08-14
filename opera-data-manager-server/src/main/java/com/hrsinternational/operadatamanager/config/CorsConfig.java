@@ -13,24 +13,12 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
 
             @Override
-            public void addCorsMappings(
-                    CorsRegistry registry
-            ) {
+            public void addCorsMappings(CorsRegistry registry) {
                 registry
                         .addMapping("/api/**")
-                        .allowedOriginPatterns(
-                                "chrome-extension://*"
-                        )
-                        .allowedOrigins(
-                                "https://*.oraclecloud.com*"
-                        )
-                        .allowedMethods(
-                                "GET",
-                                "POST",
-                                "PUT",
-                                "DELETE",
-                                "OPTIONS"
-                        )
+                        .allowedOriginPatterns("chrome-extension://*")
+                        .allowedOrigins("https://*.oraclecloud.com*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }
         };
