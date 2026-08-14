@@ -1,4 +1,4 @@
-import { DOM_ELEMENTS, DOM_EVENTS, ERROR_MESSAGES_WITH_VALUES, FIELD_ACTIONS, MESSAGE_TYPES } from "../utils/constants.js";
+import { ADF_ID, DOM_ELEMENTS, DOM_EVENTS, ERROR_MESSAGES_WITH_VALUES, FIELD_ACTIONS, MESSAGE_TYPES, STRING_VALUES } from "../utils/constants.js";
 
 window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
 
@@ -25,7 +25,7 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
         }
 
         const component = AdfPage.PAGE.findComponentByAbsoluteId(
-            field.id.replace("::content", "")
+            field.id.replace(ADF_ID.ADF_ID_PART_CONTENT, STRING_VALUES.EMPTY_STRING)
         );
 
         if (!component) {
@@ -106,18 +106,18 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 const domNode = peer?._domNode;
 
                 result = JSON.stringify({
-                    componentType: String(component._componentType ?? ""),
-                    clientId: String(component.getClientId?.() ?? ""),
-                    value: String(component.getValue?.() ?? ""),
+                    componentType: String(component._componentType ?? STRING_VALUES.EMPTY_STRING),
+                    clientId: String(component.getClientId?.() ?? STRING_VALUES.EMPTY_STRING),
+                    value: String(component.getValue?.() ?? STRING_VALUES.EMPTY_STRING),
 
                     peerExists: !!peer,
-                    peerType: String(peer?._componentType ?? ""),
+                    peerType: String(peer?._componentType ?? STRING_VALUES.EMPTY_STRING),
 
                     domNodeExists: !!domNode,
-                    domNodeTag: domNode?.tagName ?? "",
-                    domNodeType: domNode?.type ?? "",
-                    domNodeValue: domNode?.value ?? "",
-                    domNodeOuterHTML: domNode?.outerHTML ?? "",
+                    domNodeTag: domNode?.tagName ?? STRING_VALUES.EMPTY_STRING,
+                    domNodeType: domNode?.type ?? STRING_VALUES.EMPTY_STRING,
+                    domNodeValue: domNode?.value ?? STRING_VALUES.EMPTY_STRING,
+                    domNodeOuterHTML: domNode?.outerHTML ?? STRING_VALUES.EMPTY_STRING,
 
                     componentKeys: Object.keys(component),
                     peerKeys: peer ? Object.keys(peer) : [],
@@ -147,7 +147,8 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
             requestId,
             result
         },
-            "*");
+            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
+        );
 
     } catch (e) {
 
@@ -156,6 +157,7 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
             requestId,
             error: e.message
         },
-            "*");
+            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
+        );
     }
 });

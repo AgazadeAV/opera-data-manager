@@ -1,88 +1,87 @@
+import { BUILD_FORMAT, BUILD_MESSAGES, ERROR_MESSAGES_WITH_VALUES, PATHS } from "../src/utils/constants.js"
 import { cp, mkdir, rm } from "node:fs/promises";
 import { build } from "esbuild";
 
-const DIST_DIR = "dist";
-
 async function clean() {
-    await rm(DIST_DIR, {
+    await rm(PATHS.DIST_DIR, {
         recursive: true,
         force: true
     });
 }
 
 async function createDirectories() {
-    await mkdir(`${DIST_DIR}/background`, { recursive: true });
-    await mkdir(`${DIST_DIR}/content`, { recursive: true });
-    await mkdir(`${DIST_DIR}/popup`, { recursive: true });
+    await mkdir(`${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.BACKGROUND_DIR}`, { recursive: true });
+    await mkdir(`${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.CONTENT_DIR}`, { recursive: true });
+    await mkdir(`${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_DIR}`, { recursive: true });
 }
 
 async function buildJavaScript() {
 
     await build({
-        entryPoints: ["src/background/service-worker.js"],
+        entryPoints: [`${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.SERVICE_WORKER_JS}`],
         bundle: true,
-        outfile: `${DIST_DIR}/background/service-worker.js`,
-        format: "esm"
+        outfile: `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.SERVICE_WORKER_JS}`,
+        format: BUILD_FORMAT.ESM
+    });
+
+   await build({
+        entryPoints: [`${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.OPERA_CONTENT_JS}`],
+        bundle: true,
+        outfile: `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.OPERA_CONTENT_JS}`,
+        format: BUILD_FORMAT.IIFE
     });
 
     await build({
-        entryPoints: ["src/content/opera-content.js"],
+        entryPoints: [`${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.OPERA_MAIN_JS}`],
         bundle: true,
-        outfile: `${DIST_DIR}/content/opera-content.js`,
-        format: "iife"
+        outfile: `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.OPERA_MAIN_JS}`,
+        format: BUILD_FORMAT.IIFE
     });
 
     await build({
-        entryPoints: ["src/content/opera-main.js"],
+        entryPoints: [`${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_JS}`],
         bundle: true,
-        outfile: `${DIST_DIR}/content/opera-main.js`,
-        format: "iife"
-    });
-
-    await build({
-        entryPoints: ["src/popup/popup.js"],
-        bundle: true,
-        outfile: `${DIST_DIR}/popup/popup.js`,
-        format: "esm"
+        outfile: `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_JS}`,
+        format: BUILD_FORMAT.ESM
     });
 }
 
 async function copyStaticFiles() {
 
     await cp(
-        "manifest.json",
-        `${DIST_DIR}/manifest.json`
+        PATHS.MANIFEST_JSON,
+        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.MANIFEST_JSON}`
     );
 
     await cp(
-        "src/popup/popup.html",
-        `${DIST_DIR}/popup/popup.html`
+        `${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_HTML}`,
+        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_HTML}`
     );
 
     await cp(
-        "src/popup/popup.css",
-        `${DIST_DIR}/popup/popup.css`
+        `${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_CSS}`,
+        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_CSS}`
     );
 }
 
 async function main() {
 
-    console.log("Cleaning dist...");
+    console.log(BUILD_MESSAGES.CLEANING_DIST);
     await clean();
 
-    console.log("Creating directories...");
+    console.log(BUILD_MESSAGES.CREATING_DIRECTORIES);
     await createDirectories();
 
-    console.log("Building JavaScript...");
+    console.log(BUILD_MESSAGES.BUILDING_JAVASCRIPT);
     await buildJavaScript();
 
-    console.log("Copying static files...");
+    console.log(BUILD_MESSAGES.COPYING_STATIC_FILES);
     await copyStaticFiles();
 
-    console.log("Build completed successfully.");
+    console.log(BUILD_MESSAGES.BUILD_COMPLETED_SUCCESSFULY);
 }
 
 main().catch(error => {
-    console.error("Build failed:", error);
+    console.error(ERROR_MESSAGES_WITH_VALUES.BUILD_ERROR(error));
     process.exit(1);
 });

@@ -33,6 +33,7 @@ export function executeInPage(action, params = {}) {
             action,
             params
         },
-            "*");
+            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
+        );
     });
 }

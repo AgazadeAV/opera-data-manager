@@ -1,19 +1,19 @@
-import { DOM_EVENTS, DOM_IDS, DOM_SELECTORS, ERROR_MESSAGES, ERROR_MESSAGES_WITH_VALUES, IMPORT_TYPES, MESSAGE_TYPES, UI_STATUS_TYPES, UI_TEXT, UI_TEXT_WITH_VALUES } from "../utils/constants.js";
+import { DOM_EVENTS, DOM_IDS, DOM_SELECTORS, ERROR_MESSAGES, ERROR_MESSAGES_WITH_VALUES, IMPORT_TYPES, INFO_MESSAGES_WITH_VALUES, MESSAGE_TYPES, UI_STATUS_TYPES, UI_TEXT, UI_TEXT_WITH_VALUES } from "../utils/constants.js";
 
-const importTypePage = document.getElementById("import-type-page");
-const methodPage = document.getElementById("method-page");
-const manualPage = document.getElementById("manual-page");
-const filePage = document.getElementById("file-page");
-const backToImportTypes = document.getElementById("back-to-import-types");
-const backToMethods = document.getElementById("back-to-methods");
-const backFromFile = document.getElementById("back-from-file");
-const manualOption = document.getElementById("manual-option");
-const fileOption = document.getElementById("file-option");
-const form = document.getElementById("transaction-code-form");
-const createButton = document.getElementById("create-button");
-const fileInput = document.getElementById("transaction-code-file");
-const importFileButton = document.getElementById("import-file-button");
-const status = document.getElementById("status");
+const backFromFile = document.getElementById(DOM_IDS.BACK_FROM_FILE);
+const backToImportTypes = document.getElementById(DOM_IDS.BACK_TO_IMPORT_TYPES);
+const backToMethods = document.getElementById(DOM_IDS.BACK_TO_METHODS);
+const createButton = document.getElementById(DOM_IDS.CREATE_BUTTON);
+const fileInput = document.getElementById(DOM_IDS.FILE_INPUT);
+const fileOption = document.getElementById(DOM_IDS.FILE_OPTION);
+const filePage = document.getElementById(DOM_IDS.FILE_PAGE);
+const form = document.getElementById(DOM_IDS.TRANSACTION_CODE_FORM);
+const importFileButton = document.getElementById(DOM_IDS.IMPORT_FILE_BUTTON);
+const importTypePage = document.getElementById(DOM_IDS.IMPORT_TYPE_PAGE);
+const manualOption = document.getElementById(DOM_IDS.MANUAL_OPTION);
+const manualPage = document.getElementById(DOM_IDS.MANUAL_PAGE);
+const methodPage = document.getElementById(DOM_IDS.METHOD_PAGE);
+const status = document.getElementById(DOM_IDS.STATUS);
 
 function showPage(page) {
     importTypePage.hidden = true;
@@ -27,7 +27,7 @@ function showPage(page) {
 function showStatus(message, type) {
     status.hidden = false;
     status.textContent = message;
-    status.className = `status ${type}`;
+    status.className = INFO_MESSAGES_WITH_VALUES.CLASS_NAME(type);
 }
 
 document.querySelectorAll(DOM_SELECTORS.IMPORT_TYPE)
