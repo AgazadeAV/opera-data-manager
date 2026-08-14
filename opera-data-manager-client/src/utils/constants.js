@@ -6,7 +6,7 @@ export const ADF_ID = {
 }
 
 export const BOOLEAN_VALUES = {
-    BOOLEAN: "bolean"
+    BOOLEAN: "boolean"
 }
 
 export const BUILD_FORMAT = {
