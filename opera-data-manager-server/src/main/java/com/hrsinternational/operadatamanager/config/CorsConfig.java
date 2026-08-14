@@ -22,7 +22,7 @@ public class CorsConfig {
                                 "chrome-extension://*"
                         )
                         .allowedOrigins(
-                                "https://accorce1ua.oraclehospitality.eu-frankfurt-1.ocs.oraclecloud.com"
+                                "https://*.oraclecloud.com*"
                         )
                         .allowedMethods(
                                 "GET",
