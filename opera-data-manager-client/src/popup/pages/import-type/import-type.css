@@ -1,0 +1,46 @@
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option {
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 14px;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+
+    background: #fff;
+    color: #222;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.option:hover {
+    border-color: #888;
+    background: #fafafa;
+}
+
+.option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.option-title {
+    display: block;
+    margin-bottom: 4px;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.option-description {
+    display: block;
+
+    font-size: 12px;
+    color: #666;
+}

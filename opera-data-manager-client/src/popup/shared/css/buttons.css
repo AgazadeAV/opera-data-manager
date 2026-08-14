@@ -1,0 +1,30 @@
+button {
+    font-family: inherit;
+}
+
+button:disabled {
+    background: #999 !important;
+    cursor: not-allowed;
+}
+
+.back-button {
+    width: auto;
+    height: auto;
+
+    margin-bottom: 16px;
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    color: #555;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.back-button:hover {
+    color: #222;
+}

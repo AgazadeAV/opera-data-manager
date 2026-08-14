@@ -1,6 +1,6 @@
-import { BUILD_FORMAT, BUILD_MESSAGES, ERROR_MESSAGES_WITH_VALUES, PATHS } from "../src/utils/constants.js"
-import { cp, mkdir, rm } from "node:fs/promises";
+import { BUILD_FORMAT, BUILD_MESSAGES, ERROR_MESSAGES_WITH_VALUES, PATHS } from "../src/utils/constants.js";
 import { build } from "esbuild";
+import { cp, mkdir, rm } from "node:fs/promises";
 
 async function clean() {
     await rm(PATHS.DIST_DIR, {
@@ -24,7 +24,7 @@ async function buildJavaScript() {
         format: BUILD_FORMAT.ESM
     });
 
-   await build({
+    await build({
         entryPoints: [`${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.OPERA_CONTENT_JS}`],
         bundle: true,
         outfile: `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.OPERA_CONTENT_JS}`,
@@ -54,13 +54,15 @@ async function copyStaticFiles() {
     );
 
     await cp(
-        `${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_HTML}`,
-        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_HTML}`
-    );
-
-    await cp(
-        `${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_CSS}`,
-        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_CSS}`
+        `${PATHS.SRC_DIR}${PATHS.SLASH}${PATHS.POPUP_DIR}`,
+        `${PATHS.DIST_DIR}${PATHS.SLASH}${PATHS.POPUP_DIR}`,
+        {
+            recursive:
+                true,
+            filter(source) {
+                return !source.endsWith(".js");
+            }
+        }
     );
 }
 
@@ -72,16 +74,22 @@ async function main() {
     console.log(BUILD_MESSAGES.CREATING_DIRECTORIES);
     await createDirectories();
 
-    console.log(BUILD_MESSAGES.BUILDING_JAVASCRIPT);
-    await buildJavaScript();
-
     console.log(BUILD_MESSAGES.COPYING_STATIC_FILES);
     await copyStaticFiles();
+
+
+    console.log(BUILD_MESSAGES.BUILDING_JAVASCRIPT);
+    await buildJavaScript();
 
     console.log(BUILD_MESSAGES.BUILD_COMPLETED_SUCCESSFULY);
 }
 
+
 main().catch(error => {
-    console.error(ERROR_MESSAGES_WITH_VALUES.BUILD_ERROR(error));
+
+    console.error(
+        ERROR_MESSAGES_WITH_VALUES.BUILD_ERROR(error)
+    );
+
     process.exit(1);
 });

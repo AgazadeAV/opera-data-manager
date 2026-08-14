@@ -1,0 +1,44 @@
+.file-field {
+    margin-bottom: 18px;
+}
+
+.file-field label {
+    display: block;
+    margin-bottom: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.file-field input {
+    width: 100%;
+
+    padding: 8px;
+
+    border: 1px solid #ccc;
+    border-radius: 5px;
+
+    background: #fff;
+
+    font-size: 13px;
+}
+
+#import-file-button {
+    width: 100%;
+    height: 40px;
+
+    border: none;
+    border-radius: 5px;
+
+    background: #333;
+    color: #fff;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#import-file-button:hover {
+    background: #222;
+}
