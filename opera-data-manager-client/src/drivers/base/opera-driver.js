@@ -11,7 +11,7 @@ export class OperaDriver {
     NEW_BUTTON_LABEL = "New";
     SAVE_BUTTON_LABEL = "Save";
 
-    async setValue(key, value) {
+    async setFieldValue(key, value) {
 
         for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
 
@@ -46,10 +46,6 @@ export class OperaDriver {
         }
     }
 
-    async setFieldValue(labelText, fieldValue) {
-        return await this.setValue(labelText, fieldValue);
-    }
-
     async clickCheckbox(labelText, targetState) {
 
         if (targetState == null) {
@@ -67,7 +63,7 @@ export class OperaDriver {
         }
 
         const label = await this.waitForVisible(
-            () => this.getFieldByLabelText(labelText),
+            () => this.getLabelByText(labelText),
             this.DEFAULT_TIMEOUT,
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
         );
@@ -128,38 +124,44 @@ export class OperaDriver {
                 const element = getter();
 
                 if (element) {
-                    const isVisibleByBounds = Boolean(
-                        element.offsetWidth ||
-                        element.offsetHeight ||
-                        element.getClientRects().length
-                    );
+                    const style = window.getComputedStyle(element);
 
-                    if (isVisibleByBounds) {
-                        const style = window.getComputedStyle(element);
-                        const isHidden = style.visibility === "hidden" ||
-                            style.display === "none" ||
-                            style.opacity === "0";
+                    const hasLayout =
+                        element.offsetWidth > 0 ||
+                        element.offsetHeight > 0 ||
+                        element.getClientRects().length > 0;
 
-                        const isDisabled = element.hasAttribute("disabled") ||
-                            element.getAttribute("aria-disabled") === "true" ||
-                            element.classList.contains("oj-disabled");
+                    const isHidden =
+                        style.display === "none" ||
+                        style.visibility === "hidden";
 
-                        if (!isHidden && !isDisabled) return element;
+                    const isDisabled =
+                        element.hasAttribute("disabled") ||
+                        element.getAttribute("aria-disabled") === "true";
+
+                    if (hasLayout && !isHidden && !isDisabled) {
+                        return element;
                     }
                 }
 
             } catch (error) {
-
                 lastError = error;
 
-                console.warn(ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(error));
+                console.warn(
+                    ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(error)
+                );
             }
 
             await this.sleep(this.POLL_INTERVAL);
         }
 
         if (lastError) {
-            throw new Error(ERROR_MESSAGES.LAST_ERROR_MESSAGE(errorMessage, lastError.message));
+            throw new Error(
+                ERROR_MESSAGES.LAST_ERROR_MESSAGE(
+                    errorMessage,
+                    lastError.message
+                )
+            );
         }
 
         throw new Error(errorMessage);
@@ -171,14 +173,14 @@ export class OperaDriver {
 
         while (Date.now() - startTime < this.DEFAULT_TIMEOUT) {
 
-            const label = this.getFieldByLabelText(labelText);
+            const label = this.getLabelByText(labelText);
 
             if (label?.htmlFor) {
 
-                const field = document.getElementById(label.htmlFor);
+                const element = document.getElementById(label.htmlFor);
 
-                if (field?.textContent.trim()) {
-                    return field.textContent.trim();
+                if (element?.textContent.trim()) {
+                    return element.textContent.trim();
                 }
             }
 
@@ -191,6 +193,7 @@ export class OperaDriver {
     }
 
     async waitForButton(labelText) {
+
         return await this.waitForVisible(
             () => [...document.querySelectorAll("a")]
                 .find(element => element.textContent.trim() === labelText),
@@ -201,14 +204,14 @@ export class OperaDriver {
         );
     }
 
-    getFieldByLabelText(labelText) {
+    getLabelByText(labelText) {
 
-        const labelElement = [...document.querySelectorAll("label")]
+        const label = [...document.querySelectorAll("label")]
             .find(element => element.textContent.trim() === labelText);
 
-        console.log(INFO_MESSAGES.FIELD_FOUND(labelText, labelElement));
+        console.log(INFO_MESSAGES.FIELD_FOUND(labelText, label));
 
-        return labelElement;
+        return label;
     }
 
     sleep(milliseconds) {

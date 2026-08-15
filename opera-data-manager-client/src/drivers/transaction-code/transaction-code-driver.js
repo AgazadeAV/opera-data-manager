@@ -59,25 +59,25 @@ export class TransactionCodeDriver extends OperaDriver {
     async waitForTransactionCodePage() {
 
         await this.waitForVisible(
-            () => this.getFieldByLabelText(this.CODE_LABEL),
+            () => this.getLabelByText(this.CODE_LABEL),
             this.DEFAULT_TIMEOUT,
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.CODE_LABEL)
         );
 
         await this.waitForVisible(
-            () => this.getFieldByLabelText(this.DESCRIPTION_LABEL),
+            () => this.getLabelByText(this.DESCRIPTION_LABEL),
             this.DEFAULT_TIMEOUT,
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.DESCRIPTION_LABEL)
         );
 
         await this.waitForVisible(
-            () => this.getFieldByLabelText(this.TRANSACTION_TYPE_LABEL),
+            () => this.getLabelByText(this.TRANSACTION_TYPE_LABEL),
             this.DEFAULT_TIMEOUT,
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.TRANSACTION_TYPE_LABEL)
         );
 
         await this.waitForVisible(
-            () => this.getFieldByLabelText(this.SUBGROUP_LABEL),
+            () => this.getLabelByText(this.SUBGROUP_LABEL),
             this.DEFAULT_TIMEOUT,
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.SUBGROUP_LABEL)
         );
