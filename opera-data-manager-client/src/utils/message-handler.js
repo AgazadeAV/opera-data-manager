@@ -1,17 +1,9 @@
-import { ERROR_MESSAGES } from "./constants.js";
-
 export function registerMessageHandler(messageType, handler) {
 
     chrome.runtime.onMessage.addListener(
         (message, sender, sendResponse) => {
-            if (message.type !== messageType) {
-                sendResponse({
-                    success: false,
-                    error: ERROR_MESSAGES.UNKNOWN_MESSAGE_TYPE(message.type)
-                });
 
-                return false;
-            }
+            if (message.type !== messageType) return false;
 
             Promise.resolve(handler(message.data))
                 .then(result => {

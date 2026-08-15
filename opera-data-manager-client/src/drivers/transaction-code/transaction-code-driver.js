@@ -3,22 +3,83 @@ import { OperaDriver } from "../base/opera-driver.js";
 
 export class TransactionCodeDriver extends OperaDriver {
 
-    async waitForTransactionCodePage(code, description, transactionType, subgroup) {
+    CODE_LABEL = "Code";
+    DESCRIPTION_LABEL = "Description";
+    MANUAL_POSTING_LABEL = "Manual Posting";
+    REVENUE_GROUP_LABEL = "Revenue Group";
+    SUBGROUP_LABEL = "Subgroup";
+    GROUP_LABEL = "Group";
+    TRANSACTION_TYPE_LABEL = "Transaction Type";
 
-        await this.waitForVisible(() => this.getFieldByLabelText(code),
-            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(code)
+    async create(data) {
+
+        await this.clickButton(this.NEW_BUTTON_LABEL);
+
+        await this.waitForTransactionCodePage();
+
+        await this.setFieldValue(
+            this.CODE_LABEL,
+            data.code
         );
 
-        await this.waitForVisible(() => this.getFieldByLabelText(description),
-            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(description)
+        await this.setFieldValue(
+            this.DESCRIPTION_LABEL,
+            data.description
         );
 
-        await this.waitForVisible(() => this.getFieldByLabelText(transactionType),
-            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(transactionType)
+        await this.setFieldValue(
+            this.TRANSACTION_TYPE_LABEL,
+            data.transactionType
         );
 
-        await this.waitForVisible(() => this.getFieldByLabelText(subgroup),
-            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(subgroup)
+        await this.setFieldValue(
+            this.SUBGROUP_LABEL,
+            data.subgroup
+        );
+
+        await this.waitForFieldValue(this.GROUP_LABEL);
+
+        await this.clickCheckbox(
+            this.REVENUE_GROUP_LABEL,
+            data.revenueGroup
+        );
+
+        await this.clickCheckbox(
+            this.MANUAL_POSTING_LABEL,
+            data.manualPosting
+        );
+
+        await this.clickButton(this.SAVE_BUTTON_LABEL);
+
+        await this.waitForButton(this.NEW_BUTTON_LABEL);
+
+        return true;
+    }
+
+    async waitForTransactionCodePage() {
+
+        await this.waitForVisible(
+            () => this.getFieldByLabelText(this.CODE_LABEL),
+            this.DEFAULT_TIMEOUT,
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.CODE_LABEL)
+        );
+
+        await this.waitForVisible(
+            () => this.getFieldByLabelText(this.DESCRIPTION_LABEL),
+            this.DEFAULT_TIMEOUT,
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.DESCRIPTION_LABEL)
+        );
+
+        await this.waitForVisible(
+            () => this.getFieldByLabelText(this.TRANSACTION_TYPE_LABEL),
+            this.DEFAULT_TIMEOUT,
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.TRANSACTION_TYPE_LABEL)
+        );
+
+        await this.waitForVisible(
+            () => this.getFieldByLabelText(this.SUBGROUP_LABEL),
+            this.DEFAULT_TIMEOUT,
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(this.SUBGROUP_LABEL)
         );
     }
 }

@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES, ERROR_MESSAGES, MESSAGE_TYPES } from "../../../../utils/constants.js";
+import { ERROR_MESSAGES, MESSAGE_TYPES } from "../../../../utils/constants.js";
 import { showStatus } from "../../../shared/js/status.js";
 
 export function initializeManualTransactionCode() {

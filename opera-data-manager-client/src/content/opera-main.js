@@ -2,7 +2,7 @@ import { ERROR_MESSAGES, MESSAGE_TYPES } from "../utils/constants.js";
 
 window.addEventListener("message", (event) => {
     const isSameWindow = event.source === window;
-    const isAdfRequest = data?.type === MESSAGE_TYPES.OPERA_ADF_REQUEST;
+    const isAdfRequest = event.data?.type === MESSAGE_TYPES.OPERA_ADF_REQUEST;
 
     if (!isSameWindow || !isAdfRequest) return;
 

@@ -16,7 +16,8 @@ export const ERROR_MESSAGES = {
     UNKNOWN_ADF_ACTION: (action) => `Unknown ADF action: ${action}!`,
     UNKNOWN_MESSAGE_TYPE: (type) => `Unknown message type: ${type}!`,
     PAGE_LOAD_FAILED: (path) => `Failed to load page: ${path}!`,
-    POPUP_INITIALIZATION_FAILED: (error) => `Failed to initialize popup: ${error.message}!`
+    POPUP_INITIALIZATION_FAILED: (error) => `Failed to initialize popup: ${error.message}!`,
+    IMPORT_TRANSACTION_CODES_HTTP_FAILED: (status) => `Failed to import transaction codes. HTTP ${status}!`,
 };
 
 export const INFO_MESSAGES = {
@@ -32,8 +33,9 @@ export const INFO_MESSAGES = {
 };
 
 export const MESSAGE_TYPES = {
+    OPERA_ADF_REQUEST: "OPERA_ADF_REQUEST",
+    OPERA_ADF_RESPONSE: "OPERA_ADF_RESPONSE",
     CREATE_TRANSACTION_CODE: "CREATE_TRANSACTION_CODE",
     FILL_TRANSACTION_CODE: "FILL_TRANSACTION_CODE",
-    OPERA_ADF_REQUEST: "OPERA_ADF_REQUEST",
-    OPERA_ADF_RESPONSE: "OPERA_ADF_RESPONSE"
+    IMPORT_TRANSACTION_CODES: "IMPORT_TRANSACTION_CODES"
 };

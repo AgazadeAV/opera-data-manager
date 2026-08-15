@@ -8,6 +8,9 @@ export class OperaDriver {
     DEFAULT_TIMEOUT = 10000;
     POLL_INTERVAL = 100;
 
+    NEW_BUTTON_LABEL = "New";
+    SAVE_BUTTON_LABEL = "Save";
+
     async setValue(key, value) {
 
         for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
@@ -47,50 +50,72 @@ export class OperaDriver {
         return await this.setValue(labelText, fieldValue);
     }
 
-    async setCheckboxState(labelText, targetState) {
+    async clickCheckbox(labelText, targetState) {
 
         if (targetState == null) {
-            console.log(INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState));
+            console.log(
+                INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState)
+            );
+
             return;
         }
 
         if (typeof targetState !== "boolean") {
-            throw new Error(ERROR_MESSAGES.INVALID_CHECKBOX_STATE(labelText, targetState));
+            throw new Error(
+                ERROR_MESSAGES.INVALID_CHECKBOX_STATE(labelText, targetState)
+            );
         }
 
-        const label = await this.waitForVisible(() => this.getFieldByLabelText(labelText),
-            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
+        const label = await this.waitForVisible(
+            () => this.getFieldByLabelText(labelText),
+            this.DEFAULT_TIMEOUT,
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
         );
 
         const checkbox = document.getElementById(label.htmlFor);
 
         if (!checkbox) {
-            throw new Error(ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText));
+            throw new Error(
+                ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText)
+            );
         }
 
         const currentState = checkbox.checked;
 
-        console.log(INFO_MESSAGES.VALUE_INFO(labelText, currentState, targetState));
+        console.log(
+            INFO_MESSAGES.VALUE_INFO(labelText, currentState, targetState)
+        );
 
         if (currentState === targetState) {
-            console.log(INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState));
+            console.log(
+                INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState)
+            );
+
             return true;
         }
 
-        return await this.setValue(labelText, targetState);
+        checkbox.click();
+
+        return true;
     }
 
     async clickButton(labelText) {
 
-        const button = [...document.querySelectorAll("span")]
-            .find(element => element.textContent.trim() === labelText)
-            ?.querySelector("a");
+        const button = [...document.querySelectorAll("a")]
+            .find(element => element.textContent.trim() === labelText);
 
-        console.log(button);
-        button?.focus();
-        button?.click();
+        if (!button) {
+            throw new Error(
+                ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText)
+            );
+        }
+
+        button.focus();
+        button.click();
 
         console.log(INFO_MESSAGES.BUTTON_CLICKED(labelText));
+
+        return true;
     }
 
     async waitForVisible(getter, timeout, errorMessage) {
@@ -138,6 +163,42 @@ export class OperaDriver {
         }
 
         throw new Error(errorMessage);
+    }
+
+    async waitForFieldValue(labelText) {
+
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < this.DEFAULT_TIMEOUT) {
+
+            const label = this.getFieldByLabelText(labelText);
+
+            if (label?.htmlFor) {
+
+                const field = document.getElementById(label.htmlFor);
+
+                if (field?.textContent.trim()) {
+                    return field.textContent.trim();
+                }
+            }
+
+            await this.sleep(this.POLL_INTERVAL);
+        }
+
+        throw new Error(
+            ERROR_MESSAGES.ELEMENT_VALUE_FAILED(labelText)
+        );
+    }
+
+    async waitForButton(labelText) {
+        return await this.waitForVisible(
+            () => [...document.querySelectorAll("a")]
+                .find(element => element.textContent.trim() === labelText),
+
+            this.DEFAULT_TIMEOUT,
+
+            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
+        );
     }
 
     getFieldByLabelText(labelText) {

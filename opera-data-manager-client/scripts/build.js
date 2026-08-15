@@ -11,7 +11,7 @@ const MANIFEST_JSON_PATH = "manifest.json";
 const SERVICE_WORKER_JS_PATH = "background/service-worker.js"
 const OPERA_MAIN_JS_PATH = "content/opera-main.js";
 const OPERA_CONTENT_JS_PATH = "content/opera-content.js";
-const POPUP_JS_PATH = "popup/popup.css";
+const POPUP_JS_PATH = "popup/popup.js";
 
 async function clean() {
     await rm(DIST_DIR_PATH, {
