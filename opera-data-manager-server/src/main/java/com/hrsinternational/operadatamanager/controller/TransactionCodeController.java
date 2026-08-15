@@ -6,6 +6,7 @@ import com.hrsinternational.operadatamanager.service.transactioncode.Transaction
 import com.hrsinternational.operadatamanager.swagger.specs.TransactionCodeApiSpec;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,18 +19,18 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("${api.base.url}" + TransactionCodeController.API_TRANSACTION_CODE)
+@RequestMapping("${api.base.url}" + TransactionCodeController.TRANSACTION_CODE_API)
 @RequiredArgsConstructor
 public class TransactionCodeController implements TransactionCodeApiSpec {
 
-    public static final String API_TRANSACTION_CODE = "/transaction-codes";
+    public static final String TRANSACTION_CODE_API = "/transaction-codes";
     public static final String CREATE_TRANSACTION_CODE = "/create-transaction-code";
     public static final String IMPORT_TRANSACTION_CODES = "/import-transaction-codes";
 
     private final TransactionCodeService transactionCodeService;
 
     @PostMapping(CREATE_TRANSACTION_CODE)
-    public ResponseEntity<TransactionCodeResponse> createTransactionCode(
+    public ResponseEntity<@NonNull TransactionCodeResponse> createTransactionCode(
             @Valid @RequestBody TransactionCodeRequest request
     ) {
         TransactionCodeResponse response = transactionCodeService.createTrxCode(request);
@@ -39,7 +40,7 @@ public class TransactionCodeController implements TransactionCodeApiSpec {
     }
 
     @PostMapping(IMPORT_TRANSACTION_CODES)
-    public ResponseEntity<List<TransactionCodeResponse>> importTransactionCodes(
+    public ResponseEntity<@NonNull List<TransactionCodeResponse>> importTransactionCodes(
             @RequestPart("file") MultipartFile file
     ) {
         List<TransactionCodeResponse> response = transactionCodeService.importFileWithTrxCodes(file);
