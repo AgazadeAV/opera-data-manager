@@ -1,55 +1,44 @@
-import { BOOLEAN_VALUES, CONFIG, CSS_VALUES, DOM_ATTRIBUTES, DOM_CLASSES, DOM_ELEMENTS, ERROR_MESSAGES_WITH_VALUES, FIELD_ACTIONS, INFO_MESSAGES_WITH_VALUES, STRING_VALUES } from "../../utils/constants.js";
+import { ERROR_MESSAGES, INFO_MESSAGES } from "../../utils/constants.js";
 import { executeInPage } from "../../utils/execute-in-page.js";
 
 export class OperaDriver {
 
+    MAX_RETRIES = 3;
+    RETRY_DELAY = 500;
+    DEFAULT_TIMEOUT = 10000;
+    POLL_INTERVAL = 100;
+
     async setValue(key, value) {
 
-        for (let attempt = 1; attempt <= CONFIG.MAX_RETRIES; attempt++) {
+        for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
 
-            console.log(
-                INFO_MESSAGES_WITH_VALUES.SETTING_VALUE_ATTEMPTS(key, attempt, CONFIG.MAX_RETRIES)
-            );
+            console.log(INFO_MESSAGES.SETTING_VALUE(key, attempt, this.MAX_RETRIES));
 
             try {
-                const result = await executeInPage(
-                    FIELD_ACTIONS.SET_VALUE,
-                    { key, value }
-                );
+                const result = await executeInPage("setValue", { key, value });
 
-                console.log(
-                    INFO_MESSAGES_WITH_VALUES.VALUE_SET_INFO(key, result)
-                );
+                console.log(INFO_MESSAGES.VALUE_SET(key, result));
 
-                const adfMatches = String(result.adfValue ?? STRING_VALUES.EMPTY_STRING) === String(value);
-
-                const domMatches = String(result.domValue ?? STRING_VALUES.EMPTY_STRING) === String(value);
+                const adfMatches = String(result.adfValue ?? "") === String(value);
+                const domMatches = String(result.domValue ?? "") === String(value);
 
                 if (!adfMatches || !domMatches) {
-                    throw new Error(
-                        ERROR_MESSAGES_WITH_VALUES.FIELD_VERIFICATION_FAILED(key, value, result.adfValue, result.domValue)
-                    );
+                    throw new Error(ERROR_MESSAGES.FIELD_VERIFICATION_FAILED(key, value, result.adfValue, result.domValue));
                 }
 
-                console.log(
-                    INFO_MESSAGES_WITH_VALUES.ADF_AND_DOM_VERIFIED(key)
-                );
+                console.log(INFO_MESSAGES.ADF_AND_DOM_VERIFIED(key));
 
                 return result;
 
             } catch (error) {
 
-                console.warn(
-                    ERROR_MESSAGES_WITH_VALUES.SETTING_VALUE_ATTEMPTS_ERROR(key, attempt, CONFIG.MAX_RETRIES, error.message)
-                );
+                console.warn(ERROR_MESSAGES.SETTING_VALUE_FAILED(key, attempt, this.MAX_RETRIES, error.message));
 
-                if (attempt === CONFIG.MAX_RETRIES) {
-                    throw new Error(
-                        ERROR_MESSAGES_WITH_VALUES.FIELD_SET_FAILED(key, attempt, CONFIG.MAX_RETRIES)
-                    );
+                if (attempt === this.MAX_RETRIES) {
+                    throw new Error(ERROR_MESSAGES.FIELD_SET_FAILED(key, attempt, this.MAX_RETRIES));
                 }
 
-                await this.sleep(CONFIG.RETRY_DELAY);
+                await this.sleep(this.RETRY_DELAY);
             }
         }
     }
@@ -61,44 +50,30 @@ export class OperaDriver {
     async setCheckboxState(labelText, targetState) {
 
         if (targetState == null) {
-            console.log(
-                INFO_MESSAGES_WITH_VALUES.CHECKBOX_SET_SKIP(labelText, targetState)
-            );
-
+            console.log(INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState));
             return;
         }
 
-        if (typeof targetState !== BOOLEAN_VALUES.BOOLEAN) {
-            throw new Error(
-                ERROR_MESSAGES_WITH_VALUES.INVALID_CHECKBOX_STATE(labelText, targetState)
-            );
+        if (typeof targetState !== "boolean") {
+            throw new Error(ERROR_MESSAGES.INVALID_CHECKBOX_STATE(labelText, targetState));
         }
 
-        const label = await this.waitForVisible(() =>
-            this.getFieldByLabelText(labelText),
-            CONFIG.DEFAULT_TIMEOUT,
-            ERROR_MESSAGES_WITH_VALUES.FIELD_NOT_VISIBLE(labelText)
+        const label = await this.waitForVisible(() => this.getFieldByLabelText(labelText),
+            this.DEFAULT_TIMEOUT, ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
         );
 
         const checkbox = document.getElementById(label.htmlFor);
 
         if (!checkbox) {
-            throw new Error(
-                ERROR_MESSAGES_WITH_VALUES.FIELD_NOT_FOUND(labelText)
-            );
+            throw new Error(ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText));
         }
 
         const currentState = checkbox.checked;
 
-        console.log(
-            INFO_MESSAGES_WITH_VALUES.RECEIVED_VALUE_INFO(labelText, currentState, targetState)
-        );
+        console.log(INFO_MESSAGES.VALUE_INFO(labelText, currentState, targetState));
 
         if (currentState === targetState) {
-            console.log(
-                INFO_MESSAGES_WITH_VALUES.CHECKBOX_SET_SKIP(labelText, targetState)
-            );
-
+            console.log(INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState));
             return true;
         }
 
@@ -107,17 +82,15 @@ export class OperaDriver {
 
     async clickButton(labelText) {
 
-        const button = [...document.querySelectorAll(DOM_ELEMENTS.SPAN)]
+        const button = [...document.querySelectorAll("span")]
             .find(element => element.textContent.trim() === labelText)
-            ?.querySelector(DOM_ELEMENTS.ANCHOR);
+            ?.querySelector("a");
 
         console.log(button);
         button?.focus();
         button?.click();
 
-        console.log(
-            INFO_MESSAGES_WITH_VALUES.BUTTON_CLICKED(labelText)
-        );
+        console.log(INFO_MESSAGES.BUTTON_CLICKED(labelText));
     }
 
     async waitForVisible(getter, timeout, errorMessage) {
@@ -126,13 +99,10 @@ export class OperaDriver {
         let lastError = null;
 
         while (Date.now() - startTime < timeout) {
-
             try {
-
                 const element = getter();
 
                 if (element) {
-
                     const isVisibleByBounds = Boolean(
                         element.offsetWidth ||
                         element.offsetHeight ||
@@ -140,23 +110,16 @@ export class OperaDriver {
                     );
 
                     if (isVisibleByBounds) {
-
                         const style = window.getComputedStyle(element);
+                        const isHidden = style.visibility === "hidden" ||
+                            style.display === "none" ||
+                            style.opacity === "0";
 
-                        const isHidden =
-                            style.visibility === CSS_VALUES.VISIBILITY_HIDDEN ||
-                            style.display === CSS_VALUES.DISPLAY_NONE ||
-                            style.opacity === CSS_VALUES.OPACITY_TRANSPARENT;
+                        const isDisabled = element.hasAttribute("disabled") ||
+                            element.getAttribute("aria-disabled") === "true" ||
+                            element.classList.contains("oj-disabled");
 
-                        const isDisabled =
-                            element.hasAttribute(DOM_ATTRIBUTES.DISABLED) ||
-                            element.getAttribute(DOM_ATTRIBUTES.ARIA_DISABLED) ===
-                            DOM_ATTRIBUTES.ARIA_DISABLED_TRUE ||
-                            element.classList.contains(DOM_CLASSES.ORACLE_DISABLED);
-
-                        if (!isHidden && !isDisabled) {
-                            return element;
-                        }
+                        if (!isHidden && !isDisabled) return element;
                     }
                 }
 
@@ -164,18 +127,14 @@ export class OperaDriver {
 
                 lastError = error;
 
-                console.warn(
-                    ERROR_MESSAGES_WITH_VALUES.ELEMENT_VISIBILITY_CHECK_FAILED(error)
-                );
+                console.warn(ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(error));
             }
 
-            await this.sleep(CONFIG.POLL_INTERVAL);
+            await this.sleep(this.POLL_INTERVAL);
         }
 
         if (lastError) {
-            throw new Error(
-                ERROR_MESSAGES_WITH_VALUES.LAST_ERROR_MESSAGE(errorMessage, lastError.message)
-            );
+            throw new Error(ERROR_MESSAGES.LAST_ERROR_MESSAGE(errorMessage, lastError.message));
         }
 
         throw new Error(errorMessage);
@@ -183,10 +142,10 @@ export class OperaDriver {
 
     getFieldByLabelText(labelText) {
 
-        const labelElement = [...document.querySelectorAll(DOM_ELEMENTS.LABEL)]
+        const labelElement = [...document.querySelectorAll("label")]
             .find(element => element.textContent.trim() === labelText);
 
-        console.log(INFO_MESSAGES_WITH_VALUES.FIELD_FOUND(labelText, labelElement));
+        console.log(INFO_MESSAGES.FIELD_FOUND(labelText, labelElement));
 
         return labelElement;
     }

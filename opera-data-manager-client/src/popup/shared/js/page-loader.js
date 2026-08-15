@@ -1,32 +1,28 @@
-const PAGES = {
-    HEADER: "shared/components/header.html",
+import { ERROR_MESSAGES } from "../../../utils/constants.js";
 
-    IMPORT_TYPE: "pages/import-type/import-type.html",
-    METHOD: "pages/transaction-code/method/method.html",
-    MANUAL: "pages/transaction-code/manual/manual.html",
-    FILE: "pages/transaction-code/file/file.html"
-};
+const HEADER_PAGE = "shared/components/header.html";
+const IMPORT_TYPE_PAGE = "pages/import-type/import-type.html";
+const METHOD_PAGE = "pages/transaction-code/method/method.html";
+const MANUAL_PAGE = "pages/transaction-code/manual/manual.html";
+const FILE_PAGE = "pages/transaction-code/file/file.html";
 
 async function loadPage(elementId, path) {
     const element = document.getElementById(elementId);
-
     const response = await fetch(path);
 
     if (!response.ok) {
-        throw new Error(`Failed to load page: ${path}`);
+        throw new Error(ERROR_MESSAGES.PAGE_LOAD_FAILED(path));
     }
 
     element.innerHTML = await response.text();
 }
 
 export async function loadPages() {
-
     await Promise.all([
-        loadPage("header", PAGES.HEADER),
-
-        loadPage("import-type-page", PAGES.IMPORT_TYPE),
-        loadPage("method-page", PAGES.METHOD),
-        loadPage("manual-page", PAGES.MANUAL),
-        loadPage("file-page", PAGES.FILE)
+        loadPage("header", HEADER_PAGE),
+        loadPage("import-type-page", IMPORT_TYPE_PAGE),
+        loadPage("method-page", METHOD_PAGE),
+        loadPage("manual-page", MANUAL_PAGE),
+        loadPage("file-page", FILE_PAGE)
     ]);
 }

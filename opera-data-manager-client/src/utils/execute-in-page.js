@@ -1,22 +1,17 @@
-import { DOM_EVENTS, MESSAGE_TYPES } from "./constants.js";
+import { MESSAGE_TYPES } from "./constants.js";
 
 export function executeInPage(action, params = {}) {
 
     return new Promise((resolve, reject) => {
-
         const requestId = `opera-adf-${Date.now()}-${Math.random()}`;
-
         const handler = (event) => {
+            const isSameWindow = event.source === window;
+            const isAdfResponse = event.data?.type === MESSAGE_TYPES.OPERA_ADF_RESPONSE;
+            const isSameRequest = event.data?.requestId === requestId;
 
-            if (
-                event.source !== window ||
-                event.data?.type !== MESSAGE_TYPES.OPERA_ADF_RESPONSE ||
-                event.data.requestId !== requestId
-            ) {
-                return;
-            }
+            if (!isSameWindow || !isAdfResponse || !isSameRequest) return;
 
-            window.removeEventListener(DOM_EVENTS.MESSAGE, handler);
+            window.removeEventListener("message", handler);
 
             if (event.data.error) {
                 reject(new Error(event.data.error));
@@ -25,15 +20,7 @@ export function executeInPage(action, params = {}) {
             }
         };
 
-        window.addEventListener(DOM_EVENTS.MESSAGE, handler);
-
-        window.postMessage({
-            type: MESSAGE_TYPES.OPERA_ADF_REQUEST,
-            requestId,
-            action,
-            params
-        },
-            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
-        );
+        window.addEventListener("message", handler);
+        window.postMessage({ type: MESSAGE_TYPES.OPERA_ADF_REQUEST, requestId, action, params }, "*");
     });
 }

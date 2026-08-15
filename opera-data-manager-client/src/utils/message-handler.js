@@ -1,16 +1,13 @@
-import { ERROR_MESSAGES_WITH_VALUES } from "./constants.js";
+import { ERROR_MESSAGES } from "./constants.js";
 
 export function registerMessageHandler(messageType, handler) {
 
     chrome.runtime.onMessage.addListener(
-
         (message, sender, sendResponse) => {
-
             if (message.type !== messageType) {
-                
                 sendResponse({
                     success: false,
-                    error: ERROR_MESSAGES_WITH_VALUES.UNKNOWN_MESSAGE_TYPE(message.type)
+                    error: ERROR_MESSAGES.UNKNOWN_MESSAGE_TYPE(message.type)
                 });
 
                 return false;
@@ -18,22 +15,18 @@ export function registerMessageHandler(messageType, handler) {
 
             Promise.resolve(handler(message.data))
                 .then(result => {
-
                     sendResponse({
-                        success: true,
-                        result
+                        success: true, result
                     });
                 })
                 .catch(error => {
-
                     console.error(error);
-
                     sendResponse({
-                        success: false,
-                        error: error.message
+                        success: false, error: error.message
                     });
                 });
 
             return true;
-        });
+        }
+    );
 }

@@ -1,49 +1,39 @@
-import { ADF_ID, DOM_ELEMENTS, DOM_EVENTS, ERROR_MESSAGES_WITH_VALUES, FIELD_ACTIONS, MESSAGE_TYPES, STRING_VALUES } from "../utils/constants.js";
+import { ERROR_MESSAGES, MESSAGE_TYPES } from "../utils/constants.js";
 
-window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
+window.addEventListener("message", (event) => {
+    const isSameWindow = event.source === window;
+    const isAdfRequest = data?.type === MESSAGE_TYPES.OPERA_ADF_REQUEST;
 
-    if (event.source !== window ||
-        event.data?.type !== MESSAGE_TYPES.OPERA_ADF_REQUEST
-    ) {
-        return;
-    }
+    if (!isSameWindow || !isAdfRequest) return;
 
     const { requestId, action, params } = event.data;
 
     try {
         const { key, value } = params || {};
-
-        const label = [...document.querySelectorAll(DOM_ELEMENTS.LABEL)]
+        const label = [...document.querySelectorAll("label")]
             .find(element => element.textContent.trim() === key);
-
         const field = document.getElementById(label.htmlFor);
 
         if (!field) {
-            throw new Error(
-                ERROR_MESSAGES_WITH_VALUES.FIELD_NOT_FOUND(key)
-            );
+            throw new Error(ERROR_MESSAGES.ELEMENT_NOT_FOUND(key));
         }
 
         const component = AdfPage.PAGE.findComponentByAbsoluteId(
-            field.id.replace(ADF_ID.ADF_ID_PART_CONTENT, STRING_VALUES.EMPTY_STRING)
+            field.id.replace("::content", "")
         );
 
         if (!component) {
-            throw new Error(
-                ERROR_MESSAGES_WITH_VALUES.ADF_COMPONENT_NOT_FOUND(key)
-            );
+            throw new Error(ERROR_MESSAGES.ELEMENT_NOT_FOUND(key));
         }
 
         let result;
 
         switch (action) {
 
-            case FIELD_ACTIONS.SET_VALUE: {
+            case "setValue": {
                 component.setValue(value);
 
-                if (field) {
-                    field.value = value;
-                }
+                if (field) field.value = value;
 
                 result = {
                     adfValue: component.getValue?.() ?? null,
@@ -53,12 +43,10 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 break;
             }
 
-            case FIELD_ACTIONS.GET_VALUE: {
+            case "getValue": {
                 const peer = component.getPeer?.();
-
                 const domNode = peer?._domNode;
-
-                const input = domNode?.querySelector(DOM_ELEMENTS.INPUT);
+                const input = domNode?.querySelector("input");
 
                 result = {
                     adfValue: component.getValue?.() ?? null,
@@ -68,13 +56,13 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 break;
             }
 
-            case FIELD_ACTIONS.GET_TYPE: {
+            case "input": {
                 result = component.getType?.();
 
                 break;
             }
 
-            case FIELD_ACTIONS.GET_INFO: {
+            case "getInfo": {
                 result = {
                     type: component.getType?.(),
                     value: component.getValue?.(),
@@ -86,7 +74,7 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 break;
             }
 
-            case FIELD_ACTIONS.GET_METHODS: {
+            case "getMethods": {
                 result = {
                     component: Object.getOwnPropertyNames(
                         Object.getPrototypeOf(component)
@@ -100,24 +88,23 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
                 break;
             }
 
-            case FIELD_ACTIONS.GET_DEBUG: {
+            case "getDebug": {
                 const peer = component.getPeer?.();
-
                 const domNode = peer?._domNode;
 
                 result = JSON.stringify({
-                    componentType: String(component._componentType ?? STRING_VALUES.EMPTY_STRING),
-                    clientId: String(component.getClientId?.() ?? STRING_VALUES.EMPTY_STRING),
-                    value: String(component.getValue?.() ?? STRING_VALUES.EMPTY_STRING),
+                    componentType: String(component._componentType ?? ""),
+                    clientId: String(component.getClientId?.() ?? ""),
+                    value: String(component.getValue?.() ?? ""),
 
                     peerExists: !!peer,
-                    peerType: String(peer?._componentType ?? STRING_VALUES.EMPTY_STRING),
+                    peerType: String(peer?._componentType ?? ""),
 
                     domNodeExists: !!domNode,
-                    domNodeTag: domNode?.tagName ?? STRING_VALUES.EMPTY_STRING,
-                    domNodeType: domNode?.type ?? STRING_VALUES.EMPTY_STRING,
-                    domNodeValue: domNode?.value ?? STRING_VALUES.EMPTY_STRING,
-                    domNodeOuterHTML: domNode?.outerHTML ?? STRING_VALUES.EMPTY_STRING,
+                    domNodeTag: domNode?.tagName ?? "",
+                    domNodeType: domNode?.type ?? "",
+                    domNodeValue: domNode?.value ?? "",
+                    domNodeOuterHTML: domNode?.outerHTML ?? "",
 
                     componentKeys: Object.keys(component),
                     peerKeys: peer ? Object.keys(peer) : [],
@@ -136,28 +123,14 @@ window.addEventListener(DOM_EVENTS.MESSAGE, (event) => {
             }
 
             default: {
-                throw new Error(
-                    ERROR_MESSAGES_WITH_VALUES.UNKNOWN_ADF_ACTION(action)
-                );
+                throw new Error(ERROR_MESSAGES.UNKNOWN_ADF_ACTION(action));
             }
         }
 
-        window.postMessage({
-            type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
-            requestId,
-            result
-        },
-            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
-        );
+        window.postMessage({ type: MESSAGE_TYPES.OPERA_ADF_RESPONSE, requestId, result }, "*");
 
     } catch (e) {
 
-        window.postMessage({
-            type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
-            requestId,
-            error: e.message
-        },
-            MESSAGE_TYPES.POST_MESSAGE_TARGET_ORIGIN
-        );
+        window.postMessage({ type: MESSAGE_TYPES.OPERA_ADF_RESPONSE, requestId, error: e.message }, "*");
     }
 });
