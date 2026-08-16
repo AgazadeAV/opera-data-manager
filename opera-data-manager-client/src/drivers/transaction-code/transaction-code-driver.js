@@ -9,6 +9,7 @@ export class TransactionCodeDriver extends OperaDriver {
     MANUAL_POSTING_LABEL = "Manual Posting";
     REVENUE_GROUP_LABEL = "Revenue Group";
     SUBGROUP_LABEL = "Subgroup";
+    GROUP_LABEL = "Group";
     TRANSACTION_TYPE_LABEL = "Transaction Type";
 
     async create(data) {
@@ -36,6 +37,8 @@ export class TransactionCodeDriver extends OperaDriver {
             this.SUBGROUP_LABEL,
             data.subgroup
         );
+
+        await this.waitForFieldValue(this.GROUP_LABEL);
 
         await this.clickCheckbox(
             this.REVENUE_GROUP_LABEL,

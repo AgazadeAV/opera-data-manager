@@ -247,6 +247,29 @@ export class OperaDriver {
         throw new Error(errorMessage);
     }
 
+    async waitForFieldValue(labelText) {
+
+        const startTime = Date.now();
+
+        while (Date.now() - startTime < CONFIG.DEFAULT_TIMEOUT) {
+
+            const label = this.getLabelByText(labelText);
+
+            if (label?.htmlFor) {
+
+                const element = document.getElementById(label.htmlFor);
+
+                if (element?.textContent.trim()) {
+                    return true;
+                }
+            }
+
+            await this.sleep(CONFIG.POLL_INTERVAL);
+        }
+
+        return false;
+    }
+
     async waitForButton(labelText) {
 
         return await this.waitForVisible(
