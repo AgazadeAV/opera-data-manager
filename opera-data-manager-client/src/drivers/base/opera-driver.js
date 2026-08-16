@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES, INFO_MESSAGES } from "../../utils/constants.js";
-import { executeInPage } from "../../utils/execute-in-page.js";
+import { executeAdfAction } from "../../content/opera-adf-client.js";
 
 export class OperaDriver {
 
@@ -11,34 +11,34 @@ export class OperaDriver {
     NEW_BUTTON_LABEL = "New";
     SAVE_BUTTON_LABEL = "Save";
 
-    async setFieldValue(key, value) {
+    async setFieldValue(labelText, value) {
 
         for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
 
-            console.log(INFO_MESSAGES.SETTING_VALUE(key, attempt, this.MAX_RETRIES));
+            console.log(INFO_MESSAGES.SETTING_VALUE(labelText, attempt, this.MAX_RETRIES));
 
             try {
-                const result = await executeInPage("setValue", { key, value });
+                const result = await executeAdfAction("setValue", { labelText, value });
 
-                console.log(INFO_MESSAGES.VALUE_SET(key, result));
+                console.log(INFO_MESSAGES.VALUE_SET(labelText, result));
 
                 const adfMatches = String(result.adfValue ?? "") === String(value);
                 const domMatches = String(result.domValue ?? "") === String(value);
 
                 if (!adfMatches || !domMatches) {
-                    throw new Error(ERROR_MESSAGES.FIELD_VERIFICATION_FAILED(key, value, result.adfValue, result.domValue));
+                    throw new Error(ERROR_MESSAGES.FIELD_VERIFICATION_FAILED(labelText, value, result.adfValue, result.domValue));
                 }
 
-                console.log(INFO_MESSAGES.ADF_AND_DOM_VERIFIED(key));
+                console.log(INFO_MESSAGES.ADF_AND_DOM_VERIFIED(labelText));
 
                 return result;
 
             } catch (error) {
 
-                console.warn(ERROR_MESSAGES.SETTING_VALUE_FAILED(key, attempt, this.MAX_RETRIES, error.message));
+                console.warn(ERROR_MESSAGES.SETTING_VALUE_FAILED(labelText, attempt, this.MAX_RETRIES, error.message));
 
                 if (attempt === this.MAX_RETRIES) {
-                    throw new Error(ERROR_MESSAGES.FIELD_SET_FAILED(key, attempt, this.MAX_RETRIES));
+                    throw new Error(ERROR_MESSAGES.FIELD_SET_FAILED(labelText, attempt, this.MAX_RETRIES));
                 }
 
                 await this.sleep(this.RETRY_DELAY);
@@ -62,49 +62,100 @@ export class OperaDriver {
             );
         }
 
-        const label = await this.waitForVisible(
-            () => this.getLabelByText(labelText),
-            this.DEFAULT_TIMEOUT,
-            ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
-        );
+        for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
 
-        const checkbox = document.getElementById(label.htmlFor);
-
-        if (!checkbox) {
-            throw new Error(
-                ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText)
-            );
-        }
-
-        const currentState = checkbox.checked;
-
-        console.log(
-            INFO_MESSAGES.VALUE_INFO(labelText, currentState, targetState)
-        );
-
-        if (currentState === targetState) {
             console.log(
-                INFO_MESSAGES.CHECKBOX_SET_SKIP(labelText, targetState)
+                INFO_MESSAGES.SETTING_VALUE(
+                    labelText,
+                    attempt,
+                    this.MAX_RETRIES
+                )
             );
 
-            return true;
+            try {
+
+                const checkbox = await this.waitForVisible(
+                    () => this.getCheckboxByLabel(labelText),
+                    this.DEFAULT_TIMEOUT,
+                    ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
+                );
+
+                const currentState = checkbox.checked;
+
+                console.log(
+                    INFO_MESSAGES.VALUE_INFO(
+                        labelText,
+                        currentState,
+                        targetState
+                    )
+                );
+
+                if (currentState === targetState) {
+                    console.log(
+                        INFO_MESSAGES.CHECKBOX_SET_SKIP(
+                            labelText,
+                            targetState
+                        )
+                    );
+
+                    return true;
+                }
+
+                checkbox.click();
+
+                await this.waitForVisible(
+                    () => {
+                        const checkbox = this.getCheckboxByLabel(labelText);
+
+                        return checkbox?.checked === targetState
+                            ? checkbox
+                            : null;
+                    },
+                    this.DEFAULT_TIMEOUT,
+                    ERROR_MESSAGES.CHECKBOX_STATE_FAILED(
+                        labelText,
+                        targetState
+                    )
+                );
+
+                console.log(
+                    INFO_MESSAGES.VALUE_SET(
+                        labelText,
+                        targetState
+                    )
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    ERROR_MESSAGES.SETTING_VALUE_FAILED(
+                        labelText,
+                        attempt,
+                        this.MAX_RETRIES,
+                        error.message
+                    )
+                );
+
+                if (attempt === this.MAX_RETRIES) {
+                    throw new Error(
+                        ERROR_MESSAGES.FIELD_SET_FAILED(
+                            labelText,
+                            attempt,
+                            this.MAX_RETRIES
+                        )
+                    );
+                }
+
+                await this.sleep(this.RETRY_DELAY);
+            }
         }
-
-        checkbox.click();
-
-        return true;
     }
 
     async clickButton(labelText) {
 
-        const button = [...document.querySelectorAll("a")]
-            .find(element => element.textContent.trim() === labelText);
-
-        if (!button) {
-            throw new Error(
-                ERROR_MESSAGES.ELEMENT_NOT_FOUND(labelText)
-            );
-        }
+        const button = await this.waitForButton(labelText);
 
         button.focus();
         button.click();
@@ -212,6 +263,15 @@ export class OperaDriver {
         console.log(INFO_MESSAGES.FIELD_FOUND(labelText, label));
 
         return label;
+    }
+
+    getCheckboxByLabel(labelText) {
+
+        const label = this.getLabelByText(labelText);
+
+        return label?.htmlFor
+            ? document.getElementById(label.htmlFor)
+            : null;
     }
 
     sleep(milliseconds) {

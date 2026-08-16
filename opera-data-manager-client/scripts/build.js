@@ -9,7 +9,7 @@ const CONTENT_DIR_PATH = "content/";
 const POPUP_DIR_PATH = "popup/";
 const MANIFEST_JSON_PATH = "manifest.json";
 const SERVICE_WORKER_JS_PATH = "background/service-worker.js"
-const OPERA_MAIN_JS_PATH = "content/opera-main.js";
+const OPERA_ADF_HANDLER_JS_PATH = "content/opera-adf-handler.js";
 const OPERA_CONTENT_JS_PATH = "content/opera-content.js";
 const POPUP_JS_PATH = "popup/popup.js";
 
@@ -43,9 +43,9 @@ async function buildJavaScript() {
     });
 
     await build({
-        entryPoints: [`${SRC_DIR_PATH}${OPERA_MAIN_JS_PATH}`],
+        entryPoints: [`${SRC_DIR_PATH}${OPERA_ADF_HANDLER_JS_PATH}`],
         bundle: true,
-        outfile: `${DIST_DIR_PATH}${OPERA_MAIN_JS_PATH}`,
+        outfile: `${DIST_DIR_PATH}${OPERA_ADF_HANDLER_JS_PATH}`,
         format: "iife"
     });
 

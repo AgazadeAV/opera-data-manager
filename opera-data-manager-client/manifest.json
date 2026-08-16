@@ -20,7 +20,7 @@
                 "https://*.oraclecloud.com/*"
             ],
             "js": [
-                "content/opera-main.js"
+                "content/opera-adf-handler.js"
             ],
             "world": "MAIN",
             "run_at": "document_idle"
