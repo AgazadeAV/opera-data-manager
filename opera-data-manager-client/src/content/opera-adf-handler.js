@@ -9,6 +9,7 @@ window.addEventListener("message", (event) => {
     const { requestId, action, params } = event.data;
 
     try {
+
         const result = executeAction(action, params);
 
         sendAdfResponse(requestId, result);
@@ -31,6 +32,9 @@ function executeAction(action, params) {
         case "setValue":
             return setValue(params);
 
+        case "getValue":
+            return getValue(params);
+
         default:
             throw new Error(
                 ERROR_MESSAGES.UNKNOWN_ADF_ACTION(action)
@@ -38,9 +42,9 @@ function executeAction(action, params) {
     }
 }
 
-function setValue({ key, value }) {
+function setValue({ labelText, value }) {
 
-    const field = findFieldByLabel(key);
+    const field = findFieldByLabel(labelText);
 
     const component = findAdfComponent(field);
 
@@ -51,6 +55,23 @@ function setValue({ key, value }) {
     return {
         adfValue: component.getValue?.() ?? null,
         domValue: field.value ?? null
+    };
+}
+
+function getValue({ labelText }) {
+
+    const field = findFieldByLabel(labelText);
+    const component = findAdfComponent(field);
+
+    const adfValue = component.getValue?.() ?? null;
+
+    const domValue = field.type === "checkbox"
+        ? field.checked
+        : field.value ?? null;
+
+    return {
+        adfValue,
+        domValue
     };
 }
 
@@ -93,6 +114,7 @@ function findAdfComponent(field) {
 }
 
 function sendAdfResponse(requestId, result) {
+
     window.postMessage({
         type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
         requestId,
@@ -101,6 +123,7 @@ function sendAdfResponse(requestId, result) {
 }
 
 function sendAdfError(requestId, error) {
+
     window.postMessage({
         type: MESSAGE_TYPES.OPERA_ADF_RESPONSE,
         requestId,

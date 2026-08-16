@@ -5,7 +5,7 @@ export const ERROR_MESSAGES = {
     ELEMENT_NOT_FOUND: (element) => `${element} not found!`,
     ELEMENT_VISIBILITY_FAILED: (element) => `Element visibility check failed: ${element}!`,
     FIELD_SET_FAILED: (field, value, attempts) => `Failed to set ${field} to "${value}" after ${attempts} attempts!`,
-    FIELD_VERIFICATION_FAILED: (field, expected, adfValue, domValue) => `${field} verification failed. Expected="${expected}", ADF="${adfValue}", DOM="${domValue}"!`,
+    FIELD_VERIFICATION_FAILED: (field, expected, adfValue, domValue) => `${field} verification failed. Expected:"${expected}", ADF:"${adfValue}", DOM:"${domValue}"!`,
     SETTING_VALUE_FAILED: (field, attempt, maxAttempts, error) => `${field}: attempt ${attempt}/${maxAttempts} failed: ${error}`,
     CREATE_TRANSACTION_CODE_FAILED: (message) => message ? `Failed to create transaction code: ${message}` : "Failed to create transaction code!",
     CREATE_TRANSACTION_CODE_HTTP_FAILED: (status) => `Failed to create transaction code. HTTP ${status}!`,
@@ -18,6 +18,28 @@ export const ERROR_MESSAGES = {
     PAGE_LOAD_FAILED: (path) => `Failed to load page: ${path}!`,
     POPUP_INITIALIZATION_FAILED: (error) => `Failed to initialize popup: ${error.message}!`,
     IMPORT_TRANSACTION_CODES_HTTP_FAILED: (status) => `Failed to import transaction codes. HTTP ${status}!`,
+    ELEMENT_VALUE_FAILED: (labelText) =>
+        `Failed to get value for ${labelText}!`,
+
+    TRANSACTION_CODE_VALIDATION_FAILED: (
+        code,
+        field,
+        expectedValue,
+        adfValue,
+        domValue
+    ) =>
+        `Transaction code "${code}" validation failed for field "${field}"! ` +
+        `Expected: "${expectedValue}", ` +
+        `ADF: "${adfValue}", ` +
+        `DOM: "${domValue}"!`,
+
+    TRANSACTION_CODES_IMPORT_PARTIALLY_FAILED: (transactionCodes) =>
+        `The following transaction codes could not be created after retry: ${transactionCodes
+            .map(transactionCode => transactionCode.code)
+            .join(", ")}`,
+
+    CHECKBOX_STATE_FAILED: (labelText, expectedState) =>
+        `${labelText} checkbox did not reach expected state "${expectedState}"!`,
 };
 
 export const INFO_MESSAGES = {
@@ -37,5 +59,13 @@ export const MESSAGE_TYPES = {
     OPERA_ADF_RESPONSE: "OPERA_ADF_RESPONSE",
     CREATE_TRANSACTION_CODE: "CREATE_TRANSACTION_CODE",
     FILL_TRANSACTION_CODE: "FILL_TRANSACTION_CODE",
-    IMPORT_TRANSACTION_CODES: "IMPORT_TRANSACTION_CODES"
+    IMPORT_TRANSACTION_CODES: "IMPORT_TRANSACTION_CODES",
+    DOWNLOAD_FAILED_TRANSACTION_CODES: "DOWNLOAD_FAILED_TRANSACTION_CODES"
+};
+
+export const CONFIG = {
+    MAX_RETRIES: 3,
+    RETRY_DELAY: 500,
+    DEFAULT_TIMEOUT: 10000,
+    POLL_INTERVAL: 100
 };

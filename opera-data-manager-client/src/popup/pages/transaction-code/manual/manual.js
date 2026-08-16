@@ -17,7 +17,11 @@ export function initializeManualTransactionCode() {
             manualPosting: document.getElementById("manualPosting").checked
         };
 
-        if (!data.code || !data.description || !data.subgroup) {
+        if (
+            !data.code ||
+            !data.description ||
+            !data.subgroup
+        ) {
             showStatus("Please fill in all required fields!", "error");
             return;
         }
@@ -49,6 +53,11 @@ export function initializeManualTransactionCode() {
 }
 
 function setLoading(button, loading) {
+
     button.disabled = loading;
-    button.textContent = loading ? "Creating..." : "Create Transaction Code";
+
+    button.textContent =
+        loading ?
+            "Creating..." :
+            "Create Transaction Code";
 }

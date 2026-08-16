@@ -1,23 +1,24 @@
-import { ERROR_MESSAGES, INFO_MESSAGES } from "../../utils/constants.js";
+import { ERROR_MESSAGES, INFO_MESSAGES, CONFIG } from "../../utils/constants.js";
 import { executeAdfAction } from "../../content/opera-adf-client.js";
 
 export class OperaDriver {
 
-    MAX_RETRIES = 3;
-    RETRY_DELAY = 500;
-    DEFAULT_TIMEOUT = 10000;
-    POLL_INTERVAL = 100;
-
     NEW_BUTTON_LABEL = "New";
     SAVE_BUTTON_LABEL = "Save";
+    CANCEL_BUTTON_LABEL = "Cancel";
 
     async setFieldValue(labelText, value) {
 
-        for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
+        for (
+            let attempt = 1;
+            attempt <= CONFIG.MAX_RETRIES;
+            attempt++
+        ) {
 
-            console.log(INFO_MESSAGES.SETTING_VALUE(labelText, attempt, this.MAX_RETRIES));
+            console.log(INFO_MESSAGES.SETTING_VALUE(labelText, attempt, CONFIG.MAX_RETRIES));
 
             try {
+
                 const result = await executeAdfAction("setValue", { labelText, value });
 
                 console.log(INFO_MESSAGES.VALUE_SET(labelText, result));
@@ -26,22 +27,41 @@ export class OperaDriver {
                 const domMatches = String(result.domValue ?? "") === String(value);
 
                 if (!adfMatches || !domMatches) {
-                    throw new Error(ERROR_MESSAGES.FIELD_VERIFICATION_FAILED(labelText, value, result.adfValue, result.domValue));
+                    throw new Error(
+                        ERROR_MESSAGES.FIELD_VERIFICATION_FAILED(
+                            labelText,
+                            value,
+                            result.adfValue,
+                            result.domValue)
+                    );
                 }
 
-                console.log(INFO_MESSAGES.ADF_AND_DOM_VERIFIED(labelText));
+                console.log(
+                    INFO_MESSAGES.ADF_AND_DOM_VERIFIED(labelText)
+                );
 
                 return result;
 
             } catch (error) {
 
-                console.warn(ERROR_MESSAGES.SETTING_VALUE_FAILED(labelText, attempt, this.MAX_RETRIES, error.message));
+                console.warn(
+                    ERROR_MESSAGES.SETTING_VALUE_FAILED(
+                        labelText,
+                        attempt,
+                        CONFIG.MAX_RETRIES,
+                        error.message)
+                );
 
-                if (attempt === this.MAX_RETRIES) {
-                    throw new Error(ERROR_MESSAGES.FIELD_SET_FAILED(labelText, attempt, this.MAX_RETRIES));
+                if (attempt === CONFIG.MAX_RETRIES) {
+                    throw new Error(
+                        ERROR_MESSAGES.FIELD_SET_FAILED(
+                            labelText,
+                            attempt,
+                            CONFIG.MAX_RETRIES)
+                    );
                 }
 
-                await this.sleep(this.RETRY_DELAY);
+                await this.sleep(CONFIG.RETRY_DELAY);
             }
         }
     }
@@ -62,13 +82,17 @@ export class OperaDriver {
             );
         }
 
-        for (let attempt = 1; attempt <= this.MAX_RETRIES; attempt++) {
+        for (
+            let attempt = 1;
+            attempt <= CONFIG.MAX_RETRIES;
+            attempt++
+        ) {
 
             console.log(
                 INFO_MESSAGES.SETTING_VALUE(
                     labelText,
                     attempt,
-                    this.MAX_RETRIES
+                    CONFIG.MAX_RETRIES
                 )
             );
 
@@ -76,7 +100,7 @@ export class OperaDriver {
 
                 const checkbox = await this.waitForVisible(
                     () => this.getCheckboxByLabel(labelText),
-                    this.DEFAULT_TIMEOUT,
+                    CONFIG.DEFAULT_TIMEOUT,
                     ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
                 );
 
@@ -111,7 +135,7 @@ export class OperaDriver {
                             ? checkbox
                             : null;
                     },
-                    this.DEFAULT_TIMEOUT,
+                    CONFIG.DEFAULT_TIMEOUT,
                     ERROR_MESSAGES.CHECKBOX_STATE_FAILED(
                         labelText,
                         targetState
@@ -133,22 +157,22 @@ export class OperaDriver {
                     ERROR_MESSAGES.SETTING_VALUE_FAILED(
                         labelText,
                         attempt,
-                        this.MAX_RETRIES,
+                        CONFIG.MAX_RETRIES,
                         error.message
                     )
                 );
 
-                if (attempt === this.MAX_RETRIES) {
+                if (attempt === CONFIG.MAX_RETRIES) {
                     throw new Error(
                         ERROR_MESSAGES.FIELD_SET_FAILED(
                             labelText,
                             attempt,
-                            this.MAX_RETRIES
+                            CONFIG.MAX_RETRIES
                         )
                     );
                 }
 
-                await this.sleep(this.RETRY_DELAY);
+                await this.sleep(CONFIG.RETRY_DELAY);
             }
         }
     }
@@ -168,13 +192,17 @@ export class OperaDriver {
     async waitForVisible(getter, timeout, errorMessage) {
 
         const startTime = Date.now();
+
         let lastError = null;
 
         while (Date.now() - startTime < timeout) {
+
             try {
+
                 const element = getter();
 
                 if (element) {
+
                     const style = window.getComputedStyle(element);
 
                     const hasLayout =
@@ -196,6 +224,7 @@ export class OperaDriver {
                 }
 
             } catch (error) {
+
                 lastError = error;
 
                 console.warn(
@@ -203,7 +232,7 @@ export class OperaDriver {
                 );
             }
 
-            await this.sleep(this.POLL_INTERVAL);
+            await this.sleep(CONFIG.POLL_INTERVAL);
         }
 
         if (lastError) {
@@ -218,38 +247,16 @@ export class OperaDriver {
         throw new Error(errorMessage);
     }
 
-    async waitForFieldValue(labelText) {
-
-        const startTime = Date.now();
-
-        while (Date.now() - startTime < this.DEFAULT_TIMEOUT) {
-
-            const label = this.getLabelByText(labelText);
-
-            if (label?.htmlFor) {
-
-                const element = document.getElementById(label.htmlFor);
-
-                if (element?.textContent.trim()) {
-                    return element.textContent.trim();
-                }
-            }
-
-            await this.sleep(this.POLL_INTERVAL);
-        }
-
-        throw new Error(
-            ERROR_MESSAGES.ELEMENT_VALUE_FAILED(labelText)
-        );
-    }
-
     async waitForButton(labelText) {
 
         return await this.waitForVisible(
             () => [...document.querySelectorAll("a")]
-                .find(element => element.textContent.trim() === labelText),
+                .find(
+                    element =>
+                        element.textContent.trim() === labelText
+                ),
 
-            this.DEFAULT_TIMEOUT,
+            CONFIG.DEFAULT_TIMEOUT,
 
             ERROR_MESSAGES.ELEMENT_VISIBILITY_FAILED(labelText)
         );
@@ -258,7 +265,10 @@ export class OperaDriver {
     getLabelByText(labelText) {
 
         const label = [...document.querySelectorAll("label")]
-            .find(element => element.textContent.trim() === labelText);
+            .find(
+                element =>
+                    element.textContent.trim() === labelText
+            );
 
         console.log(INFO_MESSAGES.FIELD_FOUND(labelText, label));
 
